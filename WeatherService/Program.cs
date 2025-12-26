@@ -1,6 +1,7 @@
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using WeatherService.Models;
+using WeatherService.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services.AddOpenTelemetry()
 
 // Add services to the container.
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
 
 var app = builder.Build();
 
@@ -27,53 +29,19 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-app.MapGet("/weatherforecast", async (string? zipcode, IHttpClientFactory httpClientFactory) =>
+app.MapGet("/weatherforecast", async (string? zipcode, IWeatherRepository repository) =>
 {
     zipcode ??= "90210"; // Default
-    var client = httpClientFactory.CreateClient();
-
-    // 1. Geocoding: Zipcode -> Lat/Lon (using zippopotam.us)
-    var geoResponse = await client.GetAsync($"http://api.zippopotam.us/us/{zipcode}");
-    if (!geoResponse.IsSuccessStatusCode) return Results.NotFound("Zipcode not found");
-
-    var geoData = await geoResponse.Content.ReadFromJsonAsync<ZipCodeResponse>();
-    if (geoData == null || geoData.Places.Count == 0) return Results.NotFound("Invalid zip data");
-
-    var place = geoData.Places[0];
-    var lat = place.Latitude;
-    var lon = place.Longitude;
-
-    // 2. Weather: Lat/Lon -> Weather (using open-meteo.com)
-    var weatherResponse = await client.GetAsync($"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true&temperature_unit=fahrenheit");
-    if (!weatherResponse.IsSuccessStatusCode) return Results.Problem("Weather service unavailable");
-
-    var weatherData = await weatherResponse.Content.ReadFromJsonAsync<OpenMeteoResponse>();
-    if (weatherData == null) return Results.Problem("Invalid weather data");
-
-    return Results.Ok(new WeatherForecast(
-        place.PlaceName,
-        place.StateAbbreviation,
-        zipcode,
-        (int)weatherData.CurrentWeather.Temperature,
-        GetWeatherSummary(weatherData.CurrentWeather.WeatherCode),
-        DateTime.Now.ToString("yyyy-MM-dd")
-    ));
+    
+    var forecast = await repository.GetForecastAsync(zipcode);
+    
+    if (forecast == null)
+    {
+        return Results.NotFound("Weather data not found for the given zipcode.");
+    }
+    
+    return Results.Ok(forecast);
 });
 
 app.Run();
 
-string GetWeatherSummary(int code) => code switch
-{
-    0 => "Clear sky",
-    1 or 2 or 3 => "Mainly clear, partly cloudy, and overcast",
-    45 or 48 => "Fog",
-    51 or 53 or 55 => "Drizzle",
-    61 or 63 or 65 => "Rain",
-    71 or 73 or 75 => "Snow fall",
-    77 => "Snow grains",
-    80 or 81 or 82 => "Rain showers",
-    85 or 86 => "Snow showers",
-    95 => "Thunderstorm",
-    96 or 99 => "Thunderstorm with slight and heavy hail",
-    _ => "Unknown"
-};
