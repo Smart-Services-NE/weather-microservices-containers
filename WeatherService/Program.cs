@@ -21,6 +21,7 @@ builder.Services.AddOpenTelemetry()
 
 // Add services to the container.
 builder.Services.AddHttpClient();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IWeatherRepository, WeatherRepository>();
 
 var app = builder.Build();
