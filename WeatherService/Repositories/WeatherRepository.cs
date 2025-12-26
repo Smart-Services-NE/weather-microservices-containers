@@ -17,6 +17,9 @@ public class WeatherRepository : IWeatherRepository
 
     public async Task<WeatherForecast?> GetForecastAsync(string zipCode)
     {
+        var activity = System.Diagnostics.Activity.Current;
+        activity?.SetTag("weather.source", "cache");
+
         return await _cache.GetOrCreateAsync(
             $"weather:{zipCode}", 
             async cancel => await FetchForecastAsync(zipCode),
@@ -26,6 +29,9 @@ public class WeatherRepository : IWeatherRepository
 
     private async Task<WeatherForecast?> FetchForecastAsync(string zipCode)
     {
+        var activity = System.Diagnostics.Activity.Current;
+        activity?.SetTag("weather.source", "upstream");
+
         var client = _httpClientFactory.CreateClient();
 
         // 1. Geocoding: Zipcode -> Lat/Lon (using zippopotam.us)
@@ -60,7 +66,6 @@ public class WeatherRepository : IWeatherRepository
             return null;
         }
 
-        var activity = System.Diagnostics.Activity.Current;
         if (activity != null)
         {
             activity.SetTag("weather.zipcode", zipCode);
