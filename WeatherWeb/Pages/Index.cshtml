@@ -1,0 +1,87 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="display-3 fw-bold mb-4 text-gradient">Real-Time Weather</h1>
+            <p class="lead mb-5 text-secondary">Powered by Dapr, Open-Meteo, and Zippopotam.us</p>
+
+            <form method="get" class="mb-5">
+                <div class="input-group input-group-lg shadow-sm rounded-pill overflow-hidden">
+                    <input type="text" asp-for="ZipCode" class="form-control border-0 ps-4" placeholder="Enter Zipcode (e.g. 10001)" />
+                    <button class="btn btn-primary px-4 border-0" type="submit">
+                        <i class="bi bi-search me-2"></i>Search
+                    </button>
+                </div>
+            </form>
+
+            @if (Model.Forecast != null)
+            {
+                <div class="weather-card p-5 rounded-4 shadow-lg text-white text-start mb-4 position-relative overflow-hidden">
+                    <div class="position-relative z-1">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h2 class="h1 fw-bold mb-1">@Model.Forecast.City, @Model.Forecast.State</h2>
+                                <p class="opacity-75 mb-0">Zipcode: @Model.Forecast.ZipCode | @Model.Forecast.Date</p>
+                            </div>
+                            <div class="text-end">
+                                <div class="display-1 fw-bold">@Model.Forecast.TemperatureF°</div>
+                                <div class="h4 opacity-75">@Model.Forecast.Summary</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="weather-bg"></div>
+                </div>
+            }
+            else
+            {
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
+                    <div class="text-warning display-4 mb-3">⚠️</div>
+                    <h3>Whoops!</h3>
+                    <p class="text-secondary">Could not fetch weather data for Zipcode <strong>@Model.ZipCode</strong>. Please check the zipcode and try again.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-gradient {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .weather-card {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        transition: transform 0.3s ease;
+    }
+
+    .weather-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .weather-bg {
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .rounded-4 {
+        border-radius: 1.5rem !important;
+    }
+
+    .rounded-pill {
+        border-radius: 50rem !important;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
