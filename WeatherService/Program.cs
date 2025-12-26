@@ -1,5 +1,6 @@
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using WeatherService.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,15 +50,14 @@ app.MapGet("/weatherforecast", async (string? zipcode, IHttpClientFactory httpCl
     var weatherData = await weatherResponse.Content.ReadFromJsonAsync<OpenMeteoResponse>();
     if (weatherData == null) return Results.Problem("Invalid weather data");
 
-    return Results.Ok(new
-    {
-        City = place.PlaceName,
-        State = place.StateAbbreviation,
-        ZipCode = zipcode,
-        TemperatureF = (int)weatherData.CurrentWeather.Temperature,
-        Summary = GetWeatherSummary(weatherData.CurrentWeather.WeatherCode),
-        Date = DateTime.Now.ToString("yyyy-MM-dd")
-    });
+    return Results.Ok(new WeatherForecast(
+        place.PlaceName,
+        place.StateAbbreviation,
+        zipcode,
+        (int)weatherData.CurrentWeather.Temperature,
+        GetWeatherSummary(weatherData.CurrentWeather.WeatherCode),
+        DateTime.Now.ToString("yyyy-MM-dd")
+    ));
 });
 
 app.Run();
@@ -77,20 +77,3 @@ string GetWeatherSummary(int code) => code switch
     96 or 99 => "Thunderstorm with slight and heavy hail",
     _ => "Unknown"
 };
-
-public record ZipCodeResponse(
-    [property: System.Text.Json.Serialization.JsonPropertyName("post code")] string PostCode,
-    [property: System.Text.Json.Serialization.JsonPropertyName("places")] List<Place> Places);
-
-public record Place(
-    [property: System.Text.Json.Serialization.JsonPropertyName("place name")] string PlaceName,
-    [property: System.Text.Json.Serialization.JsonPropertyName("longitude")] string Longitude,
-    [property: System.Text.Json.Serialization.JsonPropertyName("state abbreviation")] string StateAbbreviation,
-    [property: System.Text.Json.Serialization.JsonPropertyName("latitude")] string Latitude);
-
-public record OpenMeteoResponse(
-    [property: System.Text.Json.Serialization.JsonPropertyName("current_weather")] CurrentWeather CurrentWeather);
-
-public record CurrentWeather(
-    [property: System.Text.Json.Serialization.JsonPropertyName("temperature")] double Temperature,
-    [property: System.Text.Json.Serialization.JsonPropertyName("weathercode")] int WeatherCode);
