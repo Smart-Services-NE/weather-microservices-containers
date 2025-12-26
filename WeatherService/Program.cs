@@ -31,7 +31,7 @@ app.UseHttpsRedirection();
 
 app.MapGet("/weatherforecast", async (string? zipcode, IWeatherRepository repository) =>
 {
-    zipcode ??= "90210"; // Default
+    zipcode ??= "68136"; // Default
     
     var forecast = await repository.GetForecastAsync(zipcode);
     
