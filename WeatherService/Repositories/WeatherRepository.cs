@@ -47,6 +47,15 @@ public class WeatherRepository : IWeatherRepository
             return null;
         }
 
+        var activity = System.Diagnostics.Activity.Current;
+        if (activity != null)
+        {
+            activity.SetTag("weather.zipcode", zipCode);
+            activity.SetTag("weather.city", place.PlaceName);
+            activity.SetTag("weather.state", place.StateAbbreviation);
+            activity.SetTag("weather.temperature_f", (int)weatherData.CurrentWeather.Temperature);
+        }
+
         return new WeatherForecast(
             place.PlaceName,
             place.StateAbbreviation,
