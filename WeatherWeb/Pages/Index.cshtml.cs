@@ -21,7 +21,7 @@ public class IndexModel : PageModel
 
     public async Task OnGetAsync()
     {
-        ZipCode ??= "90210";
+        ZipCode ??= "68136";
         var client = _clientFactory.CreateClient("WeatherApi");
         try 
         {
