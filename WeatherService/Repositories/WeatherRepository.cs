@@ -2,14 +2,14 @@ using WeatherService.Models;
 
 namespace WeatherService.Repositories;
 
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Hybrid;
 
 public class WeatherRepository : IWeatherRepository
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IMemoryCache _cache;
+    private readonly HybridCache _cache;
 
-    public WeatherRepository(IHttpClientFactory httpClientFactory, IMemoryCache cache)
+    public WeatherRepository(IHttpClientFactory httpClientFactory, HybridCache cache)
     {
         _httpClientFactory = httpClientFactory;
         _cache = cache;
@@ -17,11 +17,11 @@ public class WeatherRepository : IWeatherRepository
 
     public async Task<WeatherForecast?> GetForecastAsync(string zipCode)
     {
-        return await _cache.GetOrCreateAsync($"weather:{zipCode}", async entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-            return await FetchForecastAsync(zipCode);
-        });
+        return await _cache.GetOrCreateAsync(
+            $"weather:{zipCode}", 
+            async cancel => await FetchForecastAsync(zipCode),
+            new HybridCacheEntryOptions { Expiration = TimeSpan.FromMinutes(5) }
+        );
     }
 
     private async Task<WeatherForecast?> FetchForecastAsync(string zipCode)
