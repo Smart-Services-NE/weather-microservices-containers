@@ -1,5 +1,6 @@
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,13 @@ builder.Services.AddOpenTelemetry()
             {
                 options.Endpoint = new Uri("http://zipkin:9411/api/v2/spans");
             });
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics.AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation();
+        
+        metrics.AddPrometheusExporter();
     });
 
 // Add services to the container.
@@ -47,5 +55,7 @@ app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
+
+app.MapPrometheusScrapingEndpoint();
 
 app.Run();

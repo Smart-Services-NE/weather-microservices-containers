@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'weather-api'
+    scrape_interval: 2s
+    static_configs:
+      - targets: ['weather-api:8080']
+
+  - job_name: 'weather-web'
+    scrape_interval: 2s
+    static_configs:
+      - targets: ['weather-web:8081']
