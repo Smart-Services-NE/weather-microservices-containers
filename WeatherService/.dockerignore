@@ -1,6 +1,0 @@
-# Ignore local build artifacts
-bin/
-obj/
-
-# Ignore the other microservice folder to avoid compilation conflicts
-WeatherWeb/
