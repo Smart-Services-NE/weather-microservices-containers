@@ -11,7 +11,7 @@ services:
 
   weather-api-dapr:
     image: "daprio/daprd:latest"
-    command: [ "./daprd", "-app-id", "weather-api", "-app-port", "8080", "-app-channel-address", "weather-api", "-placement-host-address", "dapr-placement:50005", "-dapr-http-port", "3501", "--config", "/dapr/config.yaml", "--log-level", "debug" ]
+    command: [ "./daprd", "-app-id", "weather-api", "-app-port", "8080", "-app-channel-address", "weather-api", "-placement-host-address", "dapr-placement:50005", "-dapr-http-port", "3501", "--config", "/dapr/config.yaml", "--resources-path", "/dapr/policies", "--log-level", "debug" ]
     volumes:
       - "./dapr:/dapr"
     ports:
@@ -35,7 +35,7 @@ services:
 
   weather-web-dapr:
     image: "daprio/daprd:latest"
-    command: [ "./daprd", "-app-id", "weather-web", "-app-port", "8081", "-app-channel-address", "weather-web", "-placement-host-address", "dapr-placement:50005", "-dapr-http-port", "3500", "--config", "/dapr/config.yaml", "--log-level", "debug" ]
+    command: [ "./daprd", "-app-id", "weather-web", "-app-port", "8081", "-app-channel-address", "weather-web", "-placement-host-address", "dapr-placement:50005", "-dapr-http-port", "3500", "--config", "/dapr/config.yaml", "--resources-path", "/dapr/policies", "--log-level", "debug" ]
     volumes:
       - "./dapr:/dapr"
     ports:
