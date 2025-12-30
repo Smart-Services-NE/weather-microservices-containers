@@ -25,7 +25,7 @@ public class IndexModel : PageModel
         var client = _clientFactory.CreateClient("WeatherApi");
         try 
         {
-            Forecast = await client.GetFromJsonAsync<WeatherForecast>($"weatherforecast?zipcode={ZipCode}");
+            Forecast = await client.GetFromJsonAsync<WeatherForecast>($"api/weather/forecast?zipcode={ZipCode}");
         }
         catch (Exception ex)
         {

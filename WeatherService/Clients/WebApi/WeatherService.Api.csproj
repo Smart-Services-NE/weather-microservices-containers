@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Contracts/WeatherService.Contracts.csproj" />
-    <ProjectReference Include="../Managers/WeatherService.Managers.csproj" />
-    <ProjectReference Include="../Engines/WeatherService.Engines.csproj" />
-    <ProjectReference Include="../Accessors/WeatherService.Accessors.csproj" />
-    <ProjectReference Include="../Utilities/WeatherService.Utilities.csproj" />
+    <ProjectReference Include="../../Contracts/WeatherService.Contracts.csproj" />
+    <ProjectReference Include="../../Managers/WeatherService.Managers.csproj" />
+    <ProjectReference Include="../../Engines/WeatherService.Engines.csproj" />
+    <ProjectReference Include="../../Accessors/WeatherService.Accessors.csproj" />
+    <ProjectReference Include="../../Utilities/WeatherService.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>
