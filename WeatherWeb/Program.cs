@@ -28,12 +28,12 @@ builder.Services.AddOpenTelemetry()
 // Add services to the container.
 builder.Services.AddRazorPages();
 
-// Configure HttpClient to call the WeatherApi microservice
-builder.Services.AddHttpClient("WeatherApi", client =>
+// Add Dapr client for service invocation
+// Configure to use HTTP endpoint since Dapr sidecar is in a separate container
+builder.Services.AddDaprClient(client =>
 {
-    // In Docker Compose, we'll use the service name as the hostname
-    var apiHost = builder.Configuration["WeatherApiHost"] ?? "http://weather-api:8080";
-    client.BaseAddress = new Uri(apiHost);
+    client.UseHttpEndpoint("http://weather-web-dapr:3500");
+    client.UseGrpcEndpoint("http://weather-web-dapr:50002");
 });
 
 var app = builder.Build();

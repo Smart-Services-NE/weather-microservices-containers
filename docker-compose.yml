@@ -11,11 +11,12 @@ services:
 
   weather-api-dapr:
     image: "daprio/daprd:latest"
-    command: [ "./daprd", "-app-id", "weather-api", "-app-port", "8080", "-app-channel-address", "weather-api", "-placement-host-address", "dapr-placement:50005", "-dapr-http-port", "3501", "--config", "/dapr/config.yaml", "--resources-path", "/dapr/policies", "--log-level", "debug" ]
+    command: [ "./daprd", "-app-id", "weather-api", "-app-port", "8080", "-app-channel-address", "weather-api", "-placement-host-address", "dapr-placement:50005", "-dapr-http-port", "3501", "-dapr-grpc-port", "50001", "--config", "/dapr/config.yaml", "--resources-path", "/dapr/policies", "--log-level", "debug" ]
     volumes:
       - "./dapr:/dapr"
     ports:
       - "3501:3501"
+      - "50001:50001"
     depends_on:
       - weather-api
       - zipkin
@@ -29,17 +30,17 @@ services:
     environment:
       - ASPNETCORE_HTTP_PORTS=8081
       - ASPNETCORE_ENVIRONMENT=Development
-      - WeatherApiHost=http://weather-web-dapr:3500/v1.0/invoke/weather-api/method/
     depends_on:
       - weather-api
 
   weather-web-dapr:
     image: "daprio/daprd:latest"
-    command: [ "./daprd", "-app-id", "weather-web", "-app-port", "8081", "-app-channel-address", "weather-web", "-placement-host-address", "dapr-placement:50005", "-dapr-http-port", "3500", "--config", "/dapr/config.yaml", "--resources-path", "/dapr/policies", "--log-level", "debug" ]
+    command: [ "./daprd", "-app-id", "weather-web", "-app-port", "8081", "-app-channel-address", "weather-web", "-placement-host-address", "dapr-placement:50005", "-dapr-http-port", "3500", "-dapr-grpc-port", "50002", "--config", "/dapr/config.yaml", "--resources-path", "/dapr/policies", "--log-level", "debug" ]
     volumes:
       - "./dapr:/dapr"
     ports:
       - "3500:3500"
+      - "50002:50002"
     depends_on:
       - weather-web
       - zipkin

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Dapr.Client;
 
 using WeatherWeb.Models;
 
@@ -7,11 +8,11 @@ namespace WeatherWeb.Pages;
 
 public class IndexModel : PageModel
 {
-    private readonly IHttpClientFactory _clientFactory;
+    private readonly DaprClient _daprClient;
 
-    public IndexModel(IHttpClientFactory clientFactory)
+    public IndexModel(DaprClient daprClient)
     {
-        _clientFactory = clientFactory;
+        _daprClient = daprClient;
     }
 
     [BindProperty(SupportsGet = true)]
@@ -22,14 +23,16 @@ public class IndexModel : PageModel
     public async Task OnGetAsync()
     {
         ZipCode ??= "68136";
-        var client = _clientFactory.CreateClient("WeatherApi");
         try 
         {
-            Forecast = await client.GetFromJsonAsync<WeatherForecast>($"api/weather/forecast?zipcode={ZipCode}");
+            Forecast = await _daprClient.InvokeMethodAsync<WeatherForecast>(
+                HttpMethod.Get,
+                "weather-api",
+                $"api/weather/forecast?zipcode={ZipCode}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching weather: {ex.Message}");
+            Console.WriteLine($"Error fetching weather: {ex}");
         }
     }
 }
