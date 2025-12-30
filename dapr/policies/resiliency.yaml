@@ -6,10 +6,10 @@ spec:
   policies:
     retries:
       defaultRetryPolicy:
-        policy: constant
-        duration: 1s
+        policy: exponential
+        duration: 500ms
         maxRetries: 5
-        maxInterval: 5s
+        maxInterval: 30s
     
     timeouts:
       defaultTimeout: 5s
