@@ -43,7 +43,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherService.Managers.Tes
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clients", "Clients", "{756DDEFE-5C24-DD68-6CD7-6F8D59F8A9F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherService.Api", "WeatherService\Clients\WeatherService.Api.csproj", "{8B046278-2DCC-482E-8C1C-E9BAAC1048ED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherService.Api", "WeatherService\Clients\WebApi\WeatherService.Api.csproj", "{8B046278-2DCC-482E-8C1C-E9BAAC1048ED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clients.Tests", "Clients.Tests", "{8AC4F10F-3C14-076A-B4C8-400A3FB275BF}"
 EndProject
