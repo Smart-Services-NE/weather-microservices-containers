@@ -73,6 +73,17 @@ public class KafkaConsumerUtility : IKafkaConsumerUtility, IDisposable
             var messageContent = consumeResult.Message.Value;
             var topic = consumeResult.Topic;
 
+            // Log first few bytes for diagnostics
+            if (messageContent != null && messageContent.Length > 0)
+            {
+                var firstBytes = System.Text.Encoding.UTF8.GetBytes(messageContent.Substring(0, Math.Min(10, messageContent.Length)));
+                var hexString = BitConverter.ToString(firstBytes);
+                _logger.LogDebug(
+                    "Message content preview (first bytes hex): {HexBytes}, Length: {Length}",
+                    hexString,
+                    messageContent.Length);
+            }
+
             var notificationMessage = ParseKafkaMessage(topic, messageContent);
 
             return await Task.FromResult(notificationMessage);
@@ -145,9 +156,45 @@ public class KafkaConsumerUtility : IKafkaConsumerUtility, IDisposable
                 metadata
             );
         }
+        catch (System.Text.Json.JsonException ex)
+        {
+            // Check if message starts with Avro magic byte (0x00)
+            var startsWithMagicByte = messageContent != null && messageContent.Length > 0 && messageContent[0] == '\0';
+
+            if (startsWithMagicByte)
+            {
+                _logger.LogError(
+                    "Message appears to be Avro-serialized with Schema Registry format (starts with 0x00 magic byte). " +
+                    "This consumer is configured for JSON messages. " +
+                    "Please ensure messages are sent as plain JSON, not Avro. " +
+                    "Topic: {Topic}, Message length: {Length}",
+                    topic,
+                    messageContent?.Length ?? 0);
+            }
+            else
+            {
+                var preview = messageContent != null && messageContent.Length > 50
+                    ? messageContent.Substring(0, 50) + "..."
+                    : messageContent ?? "(null)";
+
+                _logger.LogWarning(ex,
+                    "Failed to parse Kafka message as JSON. Topic: {Topic}, Preview: {Preview}",
+                    topic,
+                    preview);
+            }
+
+            return new NotificationMessage(
+                Guid.NewGuid().ToString(),
+                topic,
+                "Raw Message",
+                messageContent,
+                string.Empty,
+                DateTime.UtcNow
+            );
+        }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to parse Kafka message, using raw content");
+            _logger.LogError(ex, "Unexpected error parsing Kafka message from topic {Topic}", topic);
 
             return new NotificationMessage(
                 Guid.NewGuid().ToString(),

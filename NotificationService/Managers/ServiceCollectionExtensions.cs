@@ -17,7 +17,7 @@ public static class ServiceCollectionExtensions
 
         services.AddNotificationServiceAccessors(configuration);
         services.AddNotificationServiceEngines();
-        services.AddNotificationServiceUtilities();
+        services.AddNotificationServiceUtilities(configuration);
 
         return services;
     }

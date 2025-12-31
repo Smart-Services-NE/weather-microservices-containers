@@ -108,17 +108,24 @@ services:
     environment:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_ENVIRONMENT=Development
-      # Use Confluent Cloud (comment out to use local Kafka)
+      # Kafka Configuration (Confluent Cloud)
       - Kafka__BootstrapServers=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9093}
       - Kafka__GroupId=${KAFKA_GROUP_ID:-notification-service}
       - Kafka__SecurityProtocol=${KAFKA_SECURITY_PROTOCOL:-}
       - Kafka__SaslMechanism=${KAFKA_SASL_MECHANISM:-}
       - Kafka__SaslUsername=${KAFKA_SASL_USERNAME:-}
       - Kafka__SaslPassword=${KAFKA_SASL_PASSWORD:-}
+      # Schema Registry Configuration (Required for Avro deserialization)
+      - Kafka__SchemaRegistryUrl=${KAFKA_SCHEMA_REGISTRY_URL:-}
+      - Kafka__SchemaRegistryKey=${KAFKA_SCHEMA_REGISTRY_KEY:-}
+      - Kafka__SchemaRegistrySecret=${KAFKA_SCHEMA_REGISTRY_SECRET:-}
+      # Email Configuration
       - Email__SmtpHost=smtp.gmail.com
       - Email__SmtpPort=587
       - Email__EnableSsl=true
+      # Database
       - ConnectionStrings__NotificationDb=Data Source=/app/data/notifications.db
+      # Telemetry
       - Zipkin__Endpoint=http://zipkin:9411/api/v2/spans
     depends_on:
       # Comment out kafka dependency when using Confluent Cloud

@@ -104,9 +104,11 @@ _logger.LogInformation(
 **Logs:**
 - `LogInformation`: Topics subscribed
 - `LogDebug`: Message consumed (includes Topic, Partition, Offset)
+- `LogDebug`: Message content preview (first bytes in hex, message length)
+- `LogError`: Avro format detected (magic byte 0x00, Schema Registry format)
+- `LogWarning`: JSON parsing failure with preview
 - `LogError`: Kafka consume exception
 - `LogInformation`: Consumer operation cancelled
-- `LogWarning`: Message parsing failure (includes Exception)
 - `LogError`: Kafka offset commit error
 - `LogInformation`: Consumer closed
 
@@ -117,6 +119,19 @@ _logger.LogDebug(
     consumeResult.Topic,
     consumeResult.Partition.Value,
     consumeResult.Offset.Value);
+
+_logger.LogDebug(
+    "Message content preview (first bytes hex): {HexBytes}, Length: {Length}",
+    hexString,
+    messageContent.Length);
+
+_logger.LogError(
+    "Message appears to be Avro-serialized with Schema Registry format (starts with 0x00 magic byte). " +
+    "This consumer is configured for JSON messages. " +
+    "Please ensure messages are sent as plain JSON, not Avro. " +
+    "Topic: {Topic}, Message length: {Length}",
+    topic,
+    messageContent?.Length ?? 0);
 ```
 
 ## Distributed Tracing
@@ -310,12 +325,22 @@ Microsoft.EntityFrameworkCore.DbUpdateException: Unable to save changes
 - Consumer group authorization
 - Topic not found
 - Broker unavailable
+- **Avro/JSON format mismatch** (NEW)
 
-**Example Log:**
+**Example Logs:**
 ```
 [Error] Error consuming message from Kafka
 Confluent.Kafka.ConsumeException: Group authorization failed
 ```
+
+```
+[Error] Message appears to be Avro-serialized with Schema Registry format (starts with 0x00 magic byte).
+This consumer is configured for JSON messages.
+Please ensure messages are sent as plain JSON, not Avro.
+Topic: general-events, Message length: 156
+```
+
+**Resolution:** See [TROUBLESHOOTING_KAFKA_JSON.md](../TROUBLESHOOTING_KAFKA_JSON.md) for detailed solutions
 
 #### 5. Unexpected Errors (ERROR)
 - Unhandled exceptions
