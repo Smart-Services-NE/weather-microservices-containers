@@ -69,3 +69,109 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning
     ports:
       - "3000:3000"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9093"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  notification-api:
+    build:
+      context: .
+      dockerfile: NotificationService/Clients/WebApi/Dockerfile
+    ports:
+      - "8082:8080"
+    environment:
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Use Confluent Cloud (comment out to use local Kafka)
+      - Kafka__BootstrapServers=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9093}
+      - Kafka__GroupId=${KAFKA_GROUP_ID:-notification-service}
+      - Kafka__SecurityProtocol=${KAFKA_SECURITY_PROTOCOL:-}
+      - Kafka__SaslMechanism=${KAFKA_SASL_MECHANISM:-}
+      - Kafka__SaslUsername=${KAFKA_SASL_USERNAME:-}
+      - Kafka__SaslPassword=${KAFKA_SASL_PASSWORD:-}
+      - Email__SmtpHost=smtp.gmail.com
+      - Email__SmtpPort=587
+      - Email__EnableSsl=true
+      - ConnectionStrings__NotificationDb=Data Source=/app/data/notifications.db
+      - Zipkin__Endpoint=http://zipkin:9411/api/v2/spans
+    depends_on:
+      # Comment out kafka dependency when using Confluent Cloud
+      # kafka:
+      #   condition: service_healthy
+      zipkin:
+        condition: service_started
+    volumes:
+      - ./notification-data:/app/data
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  notification-api-dapr:
+    image: "daprio/daprd:latest"
+    command:
+      - "./daprd"
+      - "-app-id"
+      - "notification-api"
+      - "-app-port"
+      - "8080"
+      - "-app-protocol"
+      - "http"
+      - "-app-channel-address"
+      - "notification-api"
+      - "-placement-host-address"
+      - "dapr-placement:50005"
+      - "-dapr-http-port"
+      - "3502"
+      - "-dapr-grpc-port"
+      - "50003"
+      - "--config"
+      - "/dapr/config.yaml"
+      - "--resources-path"
+      - "/dapr/policies"
+      - "--log-level"
+      - "debug"
+      - "--enable-metrics"
+      - "true"
+      - "--metrics-port"
+      - "9090"
+    volumes:
+      - "./dapr:/dapr"
+    ports:
+      - "3502:3502"
+      - "50003:50003"
+    depends_on:
+      notification-api:
+        condition: service_healthy
+    networks:
+      - default

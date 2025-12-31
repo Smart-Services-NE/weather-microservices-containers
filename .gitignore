@@ -37,3 +37,6 @@ obj/
 # Docker
 .docker/
 docker-compose.override.yml
+
+# Environment variables (Confluent Cloud credentials)
+.env

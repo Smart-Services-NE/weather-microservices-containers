@@ -36,12 +36,6 @@ builder.Services.AddWeatherServiceManagers();
 builder.Services.AddWeatherServiceEngines();
 builder.Services.AddWeatherServiceUtilities();
 
-// builder.Services.AddScoped<IWeatherManager, WeatherManager>();
-// builder.Services.AddScoped<IGeoCodingAccessor, GeoCodingAccessor>();
-// builder.Services.AddScoped<IWeatherDataAccessor, WeatherDataAccessor>();
-// builder.Services.AddScoped<IWeatherCodeEngine, WeatherCodeEngine>();
-// builder.Services.AddScoped<ICacheUtility, CacheUtility>();
-// builder.Services.AddSingleton<ITelemetryUtility, TelemetryUtility>();
 
 var app = builder.Build();
 

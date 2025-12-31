@@ -1,0 +1,48 @@
+{
+  "type": "record",
+  "name": "NotificationMessage",
+  "namespace": "com.weatherapp.notifications",
+  "doc": "Generic notification message schema compatible with NotificationService. Used for both 'weather-alerts' and 'general-events' topics.",
+  "fields": [
+    {
+      "name": "messageId",
+      "type": "string",
+      "doc": "Unique identifier for this notification message. Used for idempotency checks to prevent duplicate processing."
+    },
+    {
+      "name": "subject",
+      "type": "string",
+      "doc": "Email subject line"
+    },
+    {
+      "name": "body",
+      "type": "string",
+      "doc": "Email body content (plain text or HTML)"
+    },
+    {
+      "name": "recipient",
+      "type": "string",
+      "doc": "Email address of the recipient. Must be a valid email format (validated by NotificationEngine)."
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Timestamp when the notification was created (milliseconds since Unix epoch)"
+    },
+    {
+      "name": "metadata",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ],
+      "default": null,
+      "doc": "Optional metadata map. Supported keys: 'from' (custom sender email), 'isHtml' (true/false for HTML body)"
+    }
+  ]
+}

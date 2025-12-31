@@ -1,0 +1,183 @@
+{
+  "samples": [
+    {
+      "description": "Simple notification message (notification-message.avsc compatible)",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "notif-001",
+        "subject": "Welcome to Weather Alerts",
+        "body": "Thank you for subscribing to our weather notification service. You will receive alerts for severe weather conditions in your area.",
+        "recipient": "user@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "alerts@weatherapp.com",
+          "isHtml": "false"
+        }
+      }
+    },
+    {
+      "description": "HTML notification with custom sender",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "notif-002",
+        "subject": "Your Daily Weather Summary",
+        "body": "<html><body><h1>Today's Weather</h1><p>Partly cloudy with a high of 75°F</p></body></html>",
+        "recipient": "subscriber@weatherapp.com",
+        "timestamp": 1735660800000,
+        "metadata": {
+          "from": "daily@weatherapp.com",
+          "isHtml": "true",
+          "priority": "low"
+        }
+      }
+    },
+    {
+      "description": "Simple weather alert (basic notification format)",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "alert-simple-001",
+        "subject": "⚠️ Severe Weather Alert: Heavy Rain",
+        "body": "Heavy rain expected in your area starting at 3:00 PM. Expected rainfall: 2-3 inches. Please take necessary precautions.",
+        "recipient": "alerts@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "severe-weather@weatherapp.com",
+          "isHtml": "false",
+          "priority": "high"
+        }
+      }
+    },
+    {
+      "description": "Temperature extreme alert",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "alert-temp-001",
+        "subject": "🌡️ Extreme Heat Warning",
+        "body": "Extreme heat warning in effect for Phoenix, AZ. Current temperature: 112°F. Heat index: 118°F. Stay hydrated and avoid outdoor activities during peak hours (10 AM - 4 PM).",
+        "recipient": "phoenix-alerts@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "extreme-weather@weatherapp.com",
+          "isHtml": "false",
+          "alertType": "TEMPERATURE_EXTREME",
+          "severity": "SEVERE"
+        }
+      }
+    },
+    {
+      "description": "Storm warning with wind alert",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "alert-storm-001",
+        "subject": "⛈️ Severe Thunderstorm Warning",
+        "body": "Severe thunderstorm warning for Miami, FL. Wind gusts up to 65 mph expected. Heavy rain and possible hail. Seek shelter immediately. Warning in effect until 8:00 PM EST.",
+        "recipient": "miami-alerts@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "storm-alerts@weatherapp.com",
+          "isHtml": "false",
+          "alertType": "STORM_WARNING",
+          "severity": "CRITICAL"
+        }
+      }
+    },
+    {
+      "description": "Rich weather alert (weather-alert.avsc compatible - flattened for JSON producer)",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "alert-rich-001",
+        "subject": "❄️ Winter Storm Watch",
+        "body": "Winter storm watch issued for Denver, CO. Heavy snow expected: 8-12 inches. Temperatures dropping to 15°F. Wind chill: -5°F. Travel will be hazardous. Stock up on essentials and avoid unnecessary travel.",
+        "recipient": "denver-alerts@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "winter-weather@weatherapp.com",
+          "isHtml": "false",
+          "alertType": "SEVERE_WEATHER",
+          "severity": "WARNING",
+          "location_zipCode": "80202",
+          "location_city": "Denver",
+          "location_state": "Colorado",
+          "location_latitude": "39.7392",
+          "location_longitude": "-104.9903",
+          "weather_currentTemperature": "15",
+          "weather_weatherCode": "85",
+          "weather_weatherDescription": "Heavy snow",
+          "weather_windSpeed": "25",
+          "weather_precipitation": "12"
+        }
+      }
+    },
+    {
+      "description": "Multi-day forecast notification",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "forecast-001",
+        "subject": "Your 5-Day Weather Forecast",
+        "body": "Here's your 5-day forecast for Seattle, WA:\n\nMonday: Rainy, High 52°F, Low 45°F\nTuesday: Cloudy, High 55°F, Low 47°F\nWednesday: Partly Cloudy, High 58°F, Low 48°F\nThursday: Sunny, High 62°F, Low 50°F\nFriday: Sunny, High 65°F, Low 52°F\n\nStay prepared!",
+        "recipient": "forecast-subscriber@example.com",
+        "timestamp": 1735660800000,
+        "metadata": {
+          "from": "forecast@weatherapp.com",
+          "isHtml": "false",
+          "type": "forecast",
+          "days": "5"
+        }
+      }
+    },
+    {
+      "description": "Flash flood warning",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "alert-flood-001",
+        "subject": "🌊 Flash Flood Warning",
+        "body": "FLASH FLOOD WARNING for Austin, TX until 10:00 PM. Heavy rainfall rate of 3 inches per hour. Low-lying areas and creeks will flood. Do not attempt to drive through flooded roads. Turn around, don't drown!",
+        "recipient": "austin-alerts@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "flood-alerts@weatherapp.com",
+          "isHtml": "false",
+          "alertType": "PRECIPITATION_HEAVY",
+          "severity": "CRITICAL",
+          "urgency": "immediate"
+        }
+      }
+    },
+    {
+      "description": "Test notification with minimal data",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "test-minimal-001",
+        "subject": "Test Notification",
+        "body": "This is a test message from the NotificationService.",
+        "recipient": "test@example.com",
+        "timestamp": 1735574400000,
+        "metadata": null
+      }
+    },
+    {
+      "description": "Air quality alert",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "alert-airquality-001",
+        "subject": "🏭 Poor Air Quality Alert",
+        "body": "Air Quality Index (AQI) for Los Angeles, CA: 165 (Unhealthy). Sensitive groups should avoid outdoor activities. Everyone should reduce prolonged outdoor exertion. Air quality expected to improve tomorrow.",
+        "recipient": "la-alerts@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "airquality@weatherapp.com",
+          "isHtml": "false",
+          "alertType": "GENERAL_ALERT",
+          "severity": "WARNING",
+          "aqi": "165"
+        }
+      }
+    }
+  ],
+  "usage_instructions": {
+    "confluent_cloud_console": "Copy the 'payload' object and paste it into the Confluent Cloud Console message producer",
+    "kafka_console_producer": "Use the command: docker exec -i containerapp-kafka-1 kafka-console-producer --broker-list localhost:9092 --topic <topic-name>",
+    "confluent_cli": "confluent kafka topic produce <topic-name> --cluster <cluster-id> --api-key <key> --api-secret <secret>",
+    "note": "Make sure to use the correct topic name (weather-alerts or general-events) when producing messages"
+  }
+}

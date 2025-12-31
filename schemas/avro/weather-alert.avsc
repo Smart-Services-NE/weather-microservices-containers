@@ -1,0 +1,157 @@
+{
+  "type": "record",
+  "name": "WeatherAlert",
+  "namespace": "com.weatherapp.notifications",
+  "doc": "Schema for weather alert notifications sent to Kafka topic 'weather-alerts'",
+  "fields": [
+    {
+      "name": "messageId",
+      "type": "string",
+      "doc": "Unique identifier for this notification message. Used for idempotency checks."
+    },
+    {
+      "name": "subject",
+      "type": "string",
+      "doc": "Email subject line for the weather alert notification"
+    },
+    {
+      "name": "body",
+      "type": "string",
+      "doc": "Email body content containing the weather alert details (supports HTML if isHtml metadata is true)"
+    },
+    {
+      "name": "recipient",
+      "type": "string",
+      "doc": "Email address of the recipient. Must be a valid email format."
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Timestamp when the alert was generated (milliseconds since Unix epoch)"
+    },
+    {
+      "name": "alertType",
+      "type": {
+        "type": "enum",
+        "name": "AlertType",
+        "symbols": [
+          "SEVERE_WEATHER",
+          "TEMPERATURE_EXTREME",
+          "PRECIPITATION_HEAVY",
+          "WIND_WARNING",
+          "STORM_WARNING",
+          "GENERAL_ALERT"
+        ]
+      },
+      "doc": "Type of weather alert being sent"
+    },
+    {
+      "name": "severity",
+      "type": {
+        "type": "enum",
+        "name": "Severity",
+        "symbols": [
+          "INFO",
+          "WARNING",
+          "SEVERE",
+          "CRITICAL"
+        ]
+      },
+      "doc": "Severity level of the weather alert"
+    },
+    {
+      "name": "location",
+      "type": {
+        "type": "record",
+        "name": "Location",
+        "fields": [
+          {
+            "name": "zipCode",
+            "type": "string",
+            "doc": "ZIP code of the affected location"
+          },
+          {
+            "name": "city",
+            "type": ["null", "string"],
+            "default": null,
+            "doc": "City name (optional)"
+          },
+          {
+            "name": "state",
+            "type": ["null", "string"],
+            "default": null,
+            "doc": "State name (optional)"
+          },
+          {
+            "name": "latitude",
+            "type": ["null", "double"],
+            "default": null,
+            "doc": "Latitude coordinate (optional)"
+          },
+          {
+            "name": "longitude",
+            "type": ["null", "double"],
+            "default": null,
+            "doc": "Longitude coordinate (optional)"
+          }
+        ]
+      },
+      "doc": "Geographic location affected by the weather alert"
+    },
+    {
+      "name": "weatherConditions",
+      "type": {
+        "type": "record",
+        "name": "WeatherConditions",
+        "fields": [
+          {
+            "name": "currentTemperature",
+            "type": ["null", "double"],
+            "default": null,
+            "doc": "Current temperature in Celsius (optional)"
+          },
+          {
+            "name": "weatherCode",
+            "type": ["null", "int"],
+            "default": null,
+            "doc": "Weather condition code from Open-Meteo (optional)"
+          },
+          {
+            "name": "weatherDescription",
+            "type": ["null", "string"],
+            "default": null,
+            "doc": "Human-readable weather description (optional)"
+          },
+          {
+            "name": "windSpeed",
+            "type": ["null", "double"],
+            "default": null,
+            "doc": "Wind speed in km/h (optional)"
+          },
+          {
+            "name": "precipitation",
+            "type": ["null", "double"],
+            "default": null,
+            "doc": "Precipitation amount in mm (optional)"
+          }
+        ]
+      },
+      "doc": "Current weather conditions triggering the alert"
+    },
+    {
+      "name": "metadata",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ],
+      "default": null,
+      "doc": "Additional metadata (e.g., from: custom sender, isHtml: true/false, priority: high/medium/low)"
+    }
+  ]
+}

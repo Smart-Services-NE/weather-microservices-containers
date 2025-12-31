@@ -1,0 +1,328 @@
+{
+  "schema": "notification-message.avsc",
+  "description": "Sample messages for the generic NotificationMessage schema. Compatible with both 'weather-alerts' and 'general-events' topics.",
+  "samples": [
+    {
+      "description": "Minimal valid notification (required fields only)",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "min-001",
+        "subject": "Test Notification",
+        "body": "This is a minimal notification with only required fields.",
+        "recipient": "test@example.com",
+        "timestamp": 1735574400000,
+        "metadata": null
+      }
+    },
+    {
+      "description": "Plain text welcome email",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "welcome-001",
+        "subject": "Welcome to Weather Alerts Service",
+        "body": "Thank you for subscribing to our weather notification service. You will receive timely alerts about severe weather conditions in your area. Stay safe!",
+        "recipient": "newuser@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "welcome@weatherapp.com",
+          "isHtml": "false"
+        }
+      }
+    },
+    {
+      "description": "HTML formatted daily summary",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "daily-sum-001",
+        "subject": "Your Daily Weather Summary - December 30, 2025",
+        "body": "<html><body><h2>Today's Weather</h2><p><strong>Current Conditions:</strong> Partly cloudy</p><p><strong>Temperature:</strong> High 75°F / Low 58°F</p><p><strong>Precipitation:</strong> 10% chance of rain</p><hr><p style='color: #666; font-size: 12px;'>Stay informed with WeatherApp</p></body></html>",
+        "recipient": "subscriber@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "daily@weatherapp.com",
+          "isHtml": "true",
+          "priority": "low",
+          "category": "daily-summary"
+        }
+      }
+    },
+    {
+      "description": "Simple severe weather alert",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "alert-severe-001",
+        "subject": "⚠️ Severe Weather Alert: Thunderstorm Warning",
+        "body": "SEVERE THUNDERSTORM WARNING for your area until 8:00 PM EST. Expect heavy rain, lightning, and wind gusts up to 50 mph. Seek shelter indoors and avoid windows. Stay tuned for updates.",
+        "recipient": "alerts@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "severe-weather@weatherapp.com",
+          "isHtml": "false",
+          "severity": "WARNING",
+          "urgency": "immediate"
+        }
+      }
+    },
+    {
+      "description": "Extreme heat advisory",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "heat-adv-001",
+        "subject": "🌡️ Extreme Heat Advisory - Phoenix, AZ",
+        "body": "EXCESSIVE HEAT WARNING in effect for Phoenix metro area. Current temperature: 112°F. Heat index: 118°F. DANGER LEVEL: Stay indoors during peak hours (10 AM - 6 PM). Drink plenty of water. Check on elderly neighbors. Avoid strenuous outdoor activities.",
+        "recipient": "phoenix-alerts@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "extreme-weather@weatherapp.com",
+          "isHtml": "false",
+          "alertType": "HEAT_ADVISORY",
+          "severity": "SEVERE",
+          "location": "Phoenix, AZ"
+        }
+      }
+    },
+    {
+      "description": "Winter storm warning with HTML formatting",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "winter-storm-001",
+        "subject": "❄️ Winter Storm Warning - Heavy Snow Expected",
+        "body": "<html><body><div style='background: #003366; color: white; padding: 15px;'><h2 style='margin: 0;'>⚠️ WINTER STORM WARNING</h2></div><div style='padding: 15px;'><p><strong>Location:</strong> Denver, CO and surrounding areas</p><p><strong>Effective:</strong> Tonight 10 PM MST through Tuesday 6 AM MST</p><h3>Expected Conditions:</h3><ul><li>Heavy snow: 8-12 inches expected</li><li>Temperature drop to 15°F</li><li>Wind chill: -5°F</li><li>Wind gusts up to 35 mph</li></ul><h3>Safety Recommendations:</h3><ul><li>Avoid unnecessary travel</li><li>Stock up on essentials today</li><li>Prepare emergency kit</li><li>Check heating system</li></ul><p style='color: red;'><strong>Travel will be HAZARDOUS. Road closures possible.</strong></p></div></body></html>",
+        "recipient": "denver-alerts@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "winter-weather@weatherapp.com",
+          "isHtml": "true",
+          "alertType": "WINTER_STORM",
+          "severity": "WARNING",
+          "location": "Denver, CO",
+          "duration": "20 hours"
+        }
+      }
+    },
+    {
+      "description": "Flash flood emergency",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "flood-emerg-001",
+        "subject": "🌊 FLASH FLOOD EMERGENCY - Immediate Action Required",
+        "body": "FLASH FLOOD EMERGENCY for Austin, TX. Life-threatening flash flooding occurring NOW. Rainfall rate: 3-4 inches per hour. Low-lying areas already flooded. IMMEDIATE ACTIONS: Move to higher ground NOW. Do NOT drive through flooded roads. Turn around, don't drown! Emergency services responding. This is an EXTREMELY DANGEROUS situation.",
+        "recipient": "austin-emergency@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "emergency-alerts@weatherapp.com",
+          "isHtml": "false",
+          "alertType": "FLASH_FLOOD",
+          "severity": "EMERGENCY",
+          "urgency": "immediate",
+          "location": "Austin, TX"
+        }
+      }
+    },
+    {
+      "description": "Hurricane warning with evacuation info",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "hurricane-001",
+        "subject": "🌀 HURRICANE WARNING - Evacuation Orders Issued",
+        "body": "HURRICANE WARNING for coastal areas of Miami-Dade County. Category 3 hurricane expected to make landfall in 18-24 hours. MANDATORY EVACUATION ORDERS for zones A and B. Wind speeds 120+ mph expected. Storm surge 8-12 feet. Evacuation routes: I-95 North, Florida Turnpike North. Shelters opening at 2 PM. Take important documents, medications, and emergency supplies. Secure property NOW. This is a life-threatening situation. Evacuate immediately if ordered.",
+        "recipient": "miami-coastal@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "hurricane-center@weatherapp.com",
+          "isHtml": "false",
+          "alertType": "HURRICANE",
+          "severity": "CRITICAL",
+          "urgency": "immediate",
+          "category": "3",
+          "location": "Miami-Dade County, FL"
+        }
+      }
+    },
+    {
+      "description": "Tornado watch notification",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "tornado-watch-001",
+        "subject": "🌪️ Tornado Watch - Be Prepared to Take Shelter",
+        "body": "TORNADO WATCH in effect for Oklahoma City and surrounding counties until 10 PM CST. Conditions favorable for tornado development. Severe thunderstorms with large hail and damaging winds also possible. Have multiple ways to receive warnings. Know your shelter location. Monitor weather closely. If Tornado WARNING issued, take shelter immediately in interior room on lowest floor.",
+        "recipient": "okc-alerts@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "tornado-alerts@weatherapp.com",
+          "isHtml": "false",
+          "alertType": "TORNADO_WATCH",
+          "severity": "WARNING",
+          "location": "Oklahoma City, OK",
+          "expiration": "10:00 PM CST"
+        }
+      }
+    },
+    {
+      "description": "Air quality alert",
+      "topic": "weather-alerts",
+      "payload": {
+        "messageId": "airquality-001",
+        "subject": "🏭 Air Quality Alert - Unhealthy Levels",
+        "body": "AIR QUALITY ALERT for Los Angeles County. Air Quality Index (AQI): 165 - Unhealthy. Sensitive groups (children, elderly, respiratory conditions) should avoid outdoor activities. General public should limit prolonged outdoor exertion. Pollution sources: Wildfire smoke, vehicle emissions. Air quality expected to improve by tomorrow afternoon. Stay indoors if experiencing breathing difficulties.",
+        "recipient": "la-air-alerts@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "airquality@weatherapp.com",
+          "isHtml": "false",
+          "alertType": "AIR_QUALITY",
+          "severity": "WARNING",
+          "aqi": "165",
+          "level": "Unhealthy",
+          "location": "Los Angeles County, CA"
+        }
+      }
+    },
+    {
+      "description": "Weekly forecast digest (HTML)",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "weekly-forecast-001",
+        "subject": "Your 7-Day Weather Forecast - Seattle, WA",
+        "body": "<html><body><div style='font-family: Arial, sans-serif;'><h2>7-Day Forecast for Seattle, WA</h2><table border='1' cellpadding='8' style='border-collapse: collapse; width: 100%;'><tr style='background: #4CAF50; color: white;'><th>Day</th><th>Conditions</th><th>High/Low</th><th>Precip</th></tr><tr><td>Monday</td><td>☔ Rainy</td><td>52°F / 45°F</td><td>80%</td></tr><tr><td>Tuesday</td><td>☁️ Cloudy</td><td>55°F / 47°F</td><td>40%</td></tr><tr><td>Wednesday</td><td>⛅ Partly Cloudy</td><td>58°F / 48°F</td><td>20%</td></tr><tr><td>Thursday</td><td>☀️ Sunny</td><td>62°F / 50°F</td><td>10%</td></tr><tr><td>Friday</td><td>☀️ Sunny</td><td>65°F / 52°F</td><td>10%</td></tr><tr><td>Saturday</td><td>⛅ Partly Cloudy</td><td>63°F / 51°F</td><td>30%</td></tr><tr><td>Sunday</td><td>☔ Showers</td><td>57°F / 48°F</td><td>60%</td></tr></table><p style='margin-top: 20px; color: #666;'>Stay prepared for changing conditions!</p></div></body></html>",
+        "recipient": "forecast-subscriber@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "forecast@weatherapp.com",
+          "isHtml": "true",
+          "type": "weekly-forecast",
+          "location": "Seattle, WA",
+          "days": "7"
+        }
+      }
+    },
+    {
+      "description": "Account verification email",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "verify-001",
+        "subject": "Verify Your Email Address - WeatherApp",
+        "body": "<html><body><div style='max-width: 600px; margin: 0 auto; padding: 20px;'><h2>Welcome to WeatherApp!</h2><p>Please verify your email address to activate your account and start receiving weather alerts.</p><div style='text-align: center; margin: 30px 0;'><a href='https://weatherapp.com/verify?token=abc123xyz' style='background: #4CAF50; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block;'>Verify Email Address</a></div><p>Or copy and paste this link into your browser:</p><p style='color: #666; word-break: break-all;'>https://weatherapp.com/verify?token=abc123xyz</p><p style='margin-top: 30px; color: #999; font-size: 12px;'>If you didn't create this account, please ignore this email.</p></div></body></html>",
+        "recipient": "newaccount@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "noreply@weatherapp.com",
+          "isHtml": "true",
+          "type": "verification",
+          "priority": "high"
+        }
+      }
+    },
+    {
+      "description": "Password reset notification",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "pwdreset-001",
+        "subject": "Password Reset Request - WeatherApp",
+        "body": "You requested a password reset for your WeatherApp account. Click the link below to reset your password:\n\nhttps://weatherapp.com/reset-password?token=xyz789abc\n\nThis link will expire in 1 hour.\n\nIf you did not request this reset, please ignore this email and your password will remain unchanged.\n\nFor security, we recommend:\n- Using a strong, unique password\n- Enabling two-factor authentication\n- Never sharing your password\n\nBest regards,\nWeatherApp Security Team",
+        "recipient": "user@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "security@weatherapp.com",
+          "isHtml": "false",
+          "type": "password-reset",
+          "priority": "high",
+          "expires": "1 hour"
+        }
+      }
+    },
+    {
+      "description": "Subscription confirmation",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "sub-confirm-001",
+        "subject": "Subscription Confirmed - Premium Weather Alerts",
+        "body": "<html><body><div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'><div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center;'><h1 style='margin: 0;'>🎉 Welcome to Premium!</h1></div><div style='padding: 30px;'><p>Thank you for upgrading to WeatherApp Premium!</p><h3>Your Premium Benefits:</h3><ul><li>✅ Real-time severe weather alerts</li><li>✅ Extended 14-day forecasts</li><li>✅ Hourly weather updates</li><li>✅ Lightning strike alerts</li><li>✅ Custom alert zones</li><li>✅ Ad-free experience</li></ul><p><strong>Subscription Details:</strong></p><p>Plan: Premium Monthly<br>Amount: $9.99/month<br>Next billing date: January 30, 2026</p><p style='margin-top: 30px;'>Need help? Contact us at support@weatherapp.com</p></div></div></body></html>",
+        "recipient": "premium-user@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "billing@weatherapp.com",
+          "isHtml": "true",
+          "type": "subscription",
+          "plan": "premium-monthly",
+          "priority": "normal"
+        }
+      }
+    },
+    {
+      "description": "Test notification with custom metadata",
+      "topic": "general-events",
+      "payload": {
+        "messageId": "test-metadata-001",
+        "subject": "Testing Custom Metadata Fields",
+        "body": "This notification demonstrates extensive use of the metadata map to pass custom information through the system.",
+        "recipient": "test@example.com",
+        "timestamp": 1735574400000,
+        "metadata": {
+          "from": "testing@weatherapp.com",
+          "isHtml": "false",
+          "environment": "staging",
+          "testId": "META-TEST-001",
+          "version": "1.0",
+          "region": "us-west-2",
+          "customField1": "value1",
+          "customField2": "value2"
+        }
+      }
+    }
+  ],
+  "usage_instructions": {
+    "confluent_cloud_console": {
+      "steps": [
+        "1. Navigate to your Confluent Cloud cluster",
+        "2. Go to Topics → Select topic (weather-alerts or general-events)",
+        "3. Click 'Produce a new message'",
+        "4. Copy ONLY the 'payload' object from the sample above",
+        "5. Paste into the message value field",
+        "6. Click 'Produce' to send"
+      ],
+      "note": "Do not include the 'description' or 'topic' fields - only send the 'payload' contents"
+    },
+    "confluent_cli": {
+      "command": "confluent kafka topic produce <topic-name> --cluster <cluster-id> --api-key <key> --api-secret <secret>",
+      "example": "confluent kafka topic produce general-events --cluster lkc-xxxxx --api-key 4Z6OXHUL3JNA33WX --api-secret cflt3xkPbgMSvkDaCTsRPwuEci6tYPulTiJsZrInd+7aPhrtxdEL31IxrwcLHuqQ",
+      "note": "Paste the payload JSON when prompted"
+    },
+    "kafka_console_producer": {
+      "local_kafka": "docker exec -i containerapp-kafka-1 kafka-console-producer --broker-list localhost:9092 --topic <topic-name>",
+      "note": "This only works with local Kafka, not Confluent Cloud"
+    },
+    "curl_to_api": {
+      "note": "You can also send messages directly to the NotificationService API (if you add a POST endpoint)",
+      "example": "curl -X POST http://localhost:8082/api/notifications/send -H 'Content-Type: application/json' -d '{payload}'"
+    }
+  },
+  "field_descriptions": {
+    "messageId": "Unique identifier (string). Used for idempotency - duplicate messageIds are rejected",
+    "subject": "Email subject line (string). Required, no max length in schema",
+    "body": "Email body (string). Can be plain text or HTML. Set metadata.isHtml='true' for HTML rendering",
+    "recipient": "Email address (string). Must be valid email format - validated by NotificationEngine",
+    "timestamp": "Unix timestamp in milliseconds (long). Automatically converted to DateTime by KafkaConsumerUtility",
+    "metadata": "Optional map of string key-value pairs. Common keys: 'from' (sender), 'isHtml' (true/false), 'priority', 'alertType', 'severity'"
+  },
+  "validation_rules": {
+    "messageId": "Required, must be unique within processing window",
+    "subject": "Required, non-empty string",
+    "body": "Required, non-empty string",
+    "recipient": "Required, must match email regex pattern",
+    "timestamp": "Required, must be valid Unix milliseconds (long type)",
+    "metadata": "Optional, can be null or map<string, string>"
+  },
+  "metadata_conventions": {
+    "standard_keys": {
+      "from": "Custom sender email address (overrides default)",
+      "isHtml": "Set to 'true' for HTML email rendering, 'false' or omit for plain text",
+      "priority": "Suggested values: 'low', 'normal', 'high', 'urgent'",
+      "alertType": "For weather-alerts: 'SEVERE_WEATHER', 'HEAT_ADVISORY', 'WINTER_STORM', 'FLASH_FLOOD', etc.",
+      "severity": "Suggested values: 'INFO', 'WARNING', 'SEVERE', 'CRITICAL', 'EMERGENCY'",
+      "urgency": "Suggested values: 'immediate', 'expected', 'future'",
+      "location": "Location identifier (city, state, coordinates, etc.)"
+    },
+    "custom_keys": "You can add any custom key-value pairs for application-specific metadata"
+  }
+}
