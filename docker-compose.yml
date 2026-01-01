@@ -119,6 +119,7 @@ services:
       - Kafka__SchemaRegistryUrl=${KAFKA_SCHEMA_REGISTRY_URL:-}
       - Kafka__SchemaRegistryKey=${KAFKA_SCHEMA_REGISTRY_KEY:-}
       - Kafka__SchemaRegistrySecret=${KAFKA_SCHEMA_REGISTRY_SECRET:-}
+      - Kafka__UseAvroConsumer=${KAFKA_USE_AVRO_CONSUMER:-true}
       # Email Configuration
       - Email__SmtpHost=smtp.gmail.com
       - Email__SmtpPort=587

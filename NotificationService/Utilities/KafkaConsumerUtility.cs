@@ -2,6 +2,7 @@ using Confluent.Kafka;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NotificationService.Contracts;
+using System.Text.Json;
 
 namespace NotificationService.Utilities;
 
@@ -104,59 +105,19 @@ public class KafkaConsumerUtility : IKafkaConsumerUtility, IDisposable
     {
         try
         {
-            using var jsonDoc = System.Text.Json.JsonDocument.Parse(messageContent);
-            var root = jsonDoc.RootElement;
+            // Deserialize to WeatherAlertDto
+            var weatherAlert = JsonSerializer.Deserialize<WeatherAlertDto>(messageContent);
 
-            var messageId = root.TryGetProperty("messageId", out var msgId)
-                ? msgId.GetString() ?? Guid.NewGuid().ToString()
-                : Guid.NewGuid().ToString();
-
-            var subject = root.TryGetProperty("subject", out var subj)
-                ? subj.GetString() ?? "Notification"
-                : "Notification";
-
-            var body = root.TryGetProperty("body", out var bdy)
-                ? bdy.GetString() ?? string.Empty
-                : string.Empty;
-
-            var recipient = root.TryGetProperty("recipient", out var recip)
-                ? recip.GetString() ?? string.Empty
-                : string.Empty;
-
-            DateTime timestamp = DateTime.UtcNow;
-            if (root.TryGetProperty("timestamp", out var ts))
+            if (weatherAlert == null)
             {
-                if (ts.ValueKind == System.Text.Json.JsonValueKind.Number)
-                {
-                    timestamp = DateTimeOffset.FromUnixTimeMilliseconds(ts.GetInt64()).UtcDateTime;
-                }
-                else if (ts.ValueKind == System.Text.Json.JsonValueKind.String)
-                {
-                    timestamp = DateTime.Parse(ts.GetString() ?? DateTime.UtcNow.ToString());
-                }
+                _logger.LogWarning("Deserialized message was null for topic {Topic}", topic);
+                return CreateFallbackMessage(topic, messageContent);
             }
 
-            Dictionary<string, string>? metadata = null;
-            if (root.TryGetProperty("metadata", out var meta))
-            {
-                metadata = new Dictionary<string, string>();
-                foreach (var prop in meta.EnumerateObject())
-                {
-                    metadata[prop.Name] = prop.Value.GetString() ?? string.Empty;
-                }
-            }
-
-            return new NotificationMessage(
-                messageId,
-                topic,
-                subject,
-                body,
-                recipient,
-                timestamp,
-                metadata
-            );
+            // Convert DTO to domain model
+            return weatherAlert.ToNotificationMessage(topic);
         }
-        catch (System.Text.Json.JsonException ex)
+        catch (JsonException ex)
         {
             // Check if message starts with Avro magic byte (0x00)
             var startsWithMagicByte = messageContent != null && messageContent.Length > 0 && messageContent[0] == '\0';
@@ -183,28 +144,25 @@ public class KafkaConsumerUtility : IKafkaConsumerUtility, IDisposable
                     preview);
             }
 
-            return new NotificationMessage(
-                Guid.NewGuid().ToString(),
-                topic,
-                "Raw Message",
-                messageContent,
-                string.Empty,
-                DateTime.UtcNow
-            );
+            return CreateFallbackMessage(topic, messageContent);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error parsing Kafka message from topic {Topic}", topic);
-
-            return new NotificationMessage(
-                Guid.NewGuid().ToString(),
-                topic,
-                "Raw Message",
-                messageContent,
-                string.Empty,
-                DateTime.UtcNow
-            );
+            return CreateFallbackMessage(topic, messageContent);
         }
+    }
+
+    private static NotificationMessage CreateFallbackMessage(string topic, string messageContent)
+    {
+        return new NotificationMessage(
+            Guid.NewGuid().ToString(),
+            topic,
+            "Raw Message",
+            messageContent,
+            string.Empty,
+            DateTime.UtcNow
+        );
     }
 
     public async Task CommitOffsetAsync(CancellationToken cancellationToken = default)

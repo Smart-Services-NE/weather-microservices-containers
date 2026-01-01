@@ -1,0 +1,45 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Docker: Attach to NotificationService",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:pickRemoteProcess}",
+      "pipeTransport": {
+        "pipeProgram": "docker",
+        "pipeArgs": [
+          "exec",
+          "-i",
+          "containerapp-notification-api-1"
+        ],
+        "debuggerPath": "/vsdbg/vsdbg",
+        "pipeCwd": "${workspaceRoot}",
+        "quoteArgs": false
+      },
+      "sourceFileMap": {
+        "/src": "${workspaceRoot}"
+      }
+    },
+    {
+      "name": ".NET Core Launch (NotificationService - Local)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/NotificationService/Clients/WebApi/bin/Debug/net10.0/NotificationService.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/NotificationService/Clients/WebApi",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:8082",
+        "Kafka__BootstrapServers": "localhost:9092",
+        "Kafka__GroupId": "notification-service-debug"
+      }
+    }
+  ]
+}

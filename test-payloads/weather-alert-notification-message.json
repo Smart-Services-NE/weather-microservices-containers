@@ -1,0 +1,12 @@
+{
+  "messageId": "test-msg-001",
+  "subject": "Severe Weather Alert - Heavy Snow Expected",
+  "body": "A winter storm warning has been issued for your area. Expect 8-12 inches of snow between 6 PM tonight and 6 AM tomorrow. Travel will be hazardous. Please stay indoors if possible.",
+  "recipient": "user@example.com",
+  "timestamp": 1735574400000,
+  "metadata": {
+    "from": "weather-alerts@weatherapp.com",
+    "isHtml": "false",
+    "priority": "high"
+  }
+}

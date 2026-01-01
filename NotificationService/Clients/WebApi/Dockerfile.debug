@@ -1,0 +1,42 @@
+# Debug Dockerfile with vsdbg debugger
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Install vsdbg for remote debugging
+RUN apt-get update && apt-get install -y unzip && \
+    curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l /vsdbg
+
+# Copy project files
+COPY ["NotificationService/Clients/WebApi/NotificationService.Api.csproj", "NotificationService/Clients/WebApi/"]
+COPY ["NotificationService/Contracts/NotificationService.Contracts.csproj", "NotificationService/Contracts/"]
+COPY ["NotificationService/Managers/NotificationService.Managers.csproj", "NotificationService/Managers/"]
+COPY ["NotificationService/Engines/NotificationService.Engines.csproj", "NotificationService/Engines/"]
+COPY ["NotificationService/Accessors/NotificationService.Accessors.csproj", "NotificationService/Accessors/"]
+COPY ["NotificationService/Utilities/NotificationService.Utilities.csproj", "NotificationService/Utilities/"]
+
+RUN dotnet restore "NotificationService/Clients/WebApi/NotificationService.Api.csproj"
+
+# Copy source code
+COPY NotificationService/ NotificationService/
+
+WORKDIR "/src/NotificationService/Clients/WebApi"
+
+# Build in Debug mode (important for breakpoints!)
+RUN dotnet build "NotificationService.Api.csproj" -c Debug -o /app/build
+
+# Publish in Debug mode
+RUN dotnet publish "NotificationService.Api.csproj" -c Debug -o /app/publish /p:UseAppHost=false
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+
+# Copy vsdbg debugger
+COPY --from=build /vsdbg /vsdbg
+
+# Copy published app
+COPY --from=build /app/publish .
+
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "NotificationService.Api.dll"]

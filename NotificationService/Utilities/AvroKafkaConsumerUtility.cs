@@ -8,25 +8,6 @@ using NotificationService.Contracts;
 namespace NotificationService.Utilities;
 
 /// <summary>
-/// Wrapper to convert IAsyncDeserializer to IDeserializer for use with ConsumerBuilder
-/// </summary>
-internal class SyncOverAsyncDeserializer<T> : IDeserializer<T>
-{
-    private readonly IAsyncDeserializer<T> _asyncDeserializer;
-
-    public SyncOverAsyncDeserializer(IAsyncDeserializer<T> asyncDeserializer)
-    {
-        _asyncDeserializer = asyncDeserializer;
-    }
-
-    public T Deserialize(ReadOnlySpan<byte> data, bool isNull, SerializationContext context)
-    {
-        // Synchronously wait for async deserialization
-        return _asyncDeserializer.DeserializeAsync(data.ToArray(), isNull, context).GetAwaiter().GetResult();
-    }
-}
-
-/// <summary>
 /// Kafka consumer utility that deserializes Avro messages using Confluent Schema Registry
 /// </summary>
 public class AvroKafkaConsumerUtility : IKafkaConsumerUtility, IDisposable

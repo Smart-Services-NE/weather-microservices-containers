@@ -13,10 +13,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITelemetryUtility, TelemetryUtility>();
         services.AddScoped<IRetryPolicyUtility, RetryPolicyUtility>();
 
-        // Use Avro consumer if Schema Registry is configured, otherwise use JSON consumer
-        var schemaRegistryUrl = configuration["Kafka:SchemaRegistryUrl"];
-        if (!string.IsNullOrEmpty(schemaRegistryUrl) &&
-            !schemaRegistryUrl.Contains("YOUR_SCHEMA_REGISTRY"))
+        // Use Avro consumer if explicitly enabled, otherwise use JSON consumer
+        var useAvroConsumer = configuration.GetValue<bool>("Kafka:UseAvroConsumer", defaultValue: false);
+
+        if (useAvroConsumer)
         {
             services.AddSingleton<IKafkaConsumerUtility, AvroKafkaConsumerUtility>();
         }

@@ -1,0 +1,28 @@
+{
+  "messageId": "weather-alert-002",
+  "subject": "Severe Weather Alert - Heavy Snow Expected",
+  "body": "A winter storm warning has been issued for your area. Expect 8-12 inches of snow between 6 PM tonight and 6 AM tomorrow. Current temperature is -5°C with wind speeds up to 45 km/h. Travel will be hazardous. Please stay indoors if possible.",
+  "recipient": "user@example.com",
+  "timestamp": 1735574400000,
+  "alertType": "SEVERE_WEATHER",
+  "severity": "SEVERE",
+  "location": {
+    "zipCode": "10001",
+    "city": "New York",
+    "state": "NY",
+    "latitude": 40.7128,
+    "longitude": -74.0060
+  },
+  "weatherConditions": {
+    "currentTemperature": -5.0,
+    "weatherCode": 85,
+    "weatherDescription": "Heavy snow showers",
+    "windSpeed": 45.0,
+    "precipitation": 12.5
+  },
+  "metadata": {
+    "from": "weather-alerts@weatherapp.com",
+    "isHtml": "false",
+    "priority": "high"
+  }
+}
