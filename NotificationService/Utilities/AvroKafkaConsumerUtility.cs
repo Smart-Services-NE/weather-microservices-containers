@@ -192,7 +192,7 @@ public class AvroKafkaConsumerUtility : IKafkaConsumerUtility, IDisposable
         var subject = (string)record["subject"];
         var body = (string)record["body"];
         var recipient = (string)record["recipient"];
-        var timestamp = DateTimeOffset.FromUnixTimeMilliseconds((long)record["timestamp"]).UtcDateTime;
+        var timestamp = ExtractTimestamp(record["timestamp"]);
 
         // Extract metadata (nullable map)
         var metadata = ExtractMetadata(record["metadata"]);
@@ -245,7 +245,7 @@ public class AvroKafkaConsumerUtility : IKafkaConsumerUtility, IDisposable
         var subject = (string)record["subject"];
         var body = (string)record["body"];
         var recipient = (string)record["recipient"];
-        var timestamp = DateTimeOffset.FromUnixTimeMilliseconds((long)record["timestamp"]).UtcDateTime;
+        var timestamp = ExtractTimestamp(record["timestamp"]);
 
         var metadata = ExtractMetadata(record["metadata"]);
 
@@ -280,6 +280,20 @@ public class AvroKafkaConsumerUtility : IKafkaConsumerUtility, IDisposable
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Extracts timestamp from Avro record (handles both DateTime and long types)
+    /// Avro's timestamp-millis logical type can be deserialized as either DateTime or long
+    /// </summary>
+    private DateTime ExtractTimestamp(object timestampObject)
+    {
+        return timestampObject switch
+        {
+            DateTime dt => dt.ToUniversalTime(),
+            long unixMillis => DateTimeOffset.FromUnixTimeMilliseconds(unixMillis).UtcDateTime,
+            _ => throw new InvalidOperationException($"Unexpected timestamp type: {timestampObject?.GetType()}")
+        };
     }
 
     /// <summary>
