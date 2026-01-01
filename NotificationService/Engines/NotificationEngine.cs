@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using NotificationService.Contracts;
 
@@ -67,16 +68,18 @@ public class NotificationEngine : INotificationEngine
 
     public EmailRequest BuildEmailRequest(NotificationMessage message)
     {
-        var from = message.Metadata?.GetValueOrDefault("from");
-        var isHtml = message.Metadata?.GetValueOrDefault("isHtml")?.ToLowerInvariant() == "true";
+        string body = message.Body;
+        bool isHtml = message.Metadata?.GetValueOrDefault("isHtml")?.ToLowerInvariant() == "true";
 
-        return new EmailRequest(
-            message.Recipient,
-            message.Subject,
-            message.Body,
-            from,
-            isHtml
-        );
+        // Auto-generate HTML email from weather data if body is empty
+        if (string.IsNullOrWhiteSpace(body) && message.WeatherData != null)
+        {
+            body = GenerateWeatherAlertHtml(message.WeatherData, message.Subject, message.Recipient);
+            isHtml = true;
+        }
+
+        var from = message.Metadata?.GetValueOrDefault("from");
+        return new EmailRequest(message.Recipient, message.Subject, body, from, isHtml);
     }
 
     public bool ValidateMessage(NotificationMessage message)
@@ -87,7 +90,8 @@ public class NotificationEngine : INotificationEngine
         if (string.IsNullOrWhiteSpace(message.Subject))
             return false;
 
-        if (string.IsNullOrWhiteSpace(message.Body))
+        // Body can be empty if WeatherData is present (will be auto-generated)
+        if (string.IsNullOrWhiteSpace(message.Body) && message.WeatherData == null)
             return false;
 
         if (!IsValidEmail(message.Recipient))
@@ -95,6 +99,106 @@ public class NotificationEngine : INotificationEngine
 
         return true;
     }
+
+    /// <summary>
+    /// Generates a professional HTML email from weather alert data
+    /// </summary>
+    private string GenerateWeatherAlertHtml(WeatherAlertData weatherData, string subject, string recipient)
+    {
+        var severity = weatherData.Severity;
+        var severityColor = severity switch
+        {
+            Severity.Critical => "#DC2626", // red-600
+            Severity.Severe => "#EA580C",   // orange-600
+            Severity.Warning => "#D97706",  // amber-600
+            Severity.Info => "#2563EB",     // blue-600
+            _ => "#6B7280"                  // gray-500
+        };
+
+        var alertTypeText = weatherData.AlertType switch
+        {
+            AlertType.SevereWeather => "Severe Weather Alert",
+            AlertType.TemperatureExtreme => "Temperature Extreme Alert",
+            AlertType.PrecipitationHeavy => "Heavy Precipitation Alert",
+            AlertType.WindWarning => "Wind Warning",
+            AlertType.StormWarning => "Storm Warning",
+            AlertType.GeneralAlert => "Weather Alert",
+            _ => "Weather Alert"
+        };
+
+        var location = weatherData.Location;
+        var locationParts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(location.City))
+            locationParts.Add(location.City);
+        if (!string.IsNullOrWhiteSpace(location.State))
+            locationParts.Add(location.State);
+        locationParts.Add(location.ZipCode);
+
+        var locationText = string.Join(", ", locationParts);
+
+        var weather = weatherData.WeatherConditions;
+        var weatherHtml = new StringBuilder();
+
+        if (weather.CurrentTemperature.HasValue)
+        {
+            var tempF = CelsiusToFahrenheit(weather.CurrentTemperature.Value);
+            weatherHtml.Append($"<p><strong>Temperature:</strong> {weather.CurrentTemperature:F1}°C ({tempF:F1}°F)</p>");
+        }
+
+        if (!string.IsNullOrWhiteSpace(weather.WeatherDescription))
+        {
+            weatherHtml.Append($"<p><strong>Conditions:</strong> {weather.WeatherDescription}</p>");
+        }
+
+        if (weather.WindSpeed.HasValue)
+        {
+            var windMph = KmhToMph(weather.WindSpeed.Value);
+            weatherHtml.Append($"<p><strong>Wind Speed:</strong> {weather.WindSpeed:F1} km/h ({windMph:F1} mph)</p>");
+        }
+
+        if (weather.Precipitation.HasValue && weather.Precipitation.Value > 0)
+        {
+            weatherHtml.Append($"<p><strong>Precipitation:</strong> {weather.Precipitation:F1} mm</p>");
+        }
+
+        return $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+</head>
+<body style=""font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;"">
+    <div style=""background-color: {severityColor}; color: white; padding: 20px; border-radius: 8px 8px 0 0;"">
+        <h1 style=""margin: 0; font-size: 24px;"">{subject}</h1>
+        <p style=""margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;"">{severity} - {alertTypeText}</p>
+    </div>
+
+    <div style=""background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;"">
+        <h2 style=""margin-top: 0; color: #1f2937; font-size: 18px;"">Location</h2>
+        <p style=""margin: 5px 0; font-size: 16px;"">{locationText}</p>
+
+        {(weatherHtml.Length > 0 ? $@"
+        <h2 style=""margin-top: 20px; color: #1f2937; font-size: 18px;"">Current Conditions</h2>
+        {weatherHtml}" : "")}
+
+        <div style=""margin-top: 30px; padding-top: 20px; border-top: 1px solid #d1d5db; font-size: 12px; color: #6b7280;"">
+            <p>This is an automated weather alert from Weather App.</p>
+            <p>Sent to: {recipient}</p>
+        </div>
+    </div>
+</body>
+</html>";
+    }
+
+    /// <summary>
+    /// Converts Celsius to Fahrenheit
+    /// </summary>
+    private static double CelsiusToFahrenheit(double celsius) => (celsius * 9 / 5) + 32;
+
+    /// <summary>
+    /// Converts km/h to mph
+    /// </summary>
+    private static double KmhToMph(double kmh) => kmh * 0.621371;
 
     private static bool IsValidEmail(string email)
     {

@@ -1,0 +1,65 @@
+{
+  // C# and OmniSharp Configuration
+  "dotnet.defaultSolution": "WeatherApp.sln",
+
+  // Enable semantic highlighting for C#
+  "editor.semanticHighlighting.enabled": true,
+
+  // OmniSharp specific settings
+  "omnisharp.useModernNet": true,
+  "omnisharp.path": "latest",
+  "omnisharp.enableEditorConfigSupport": true,
+  "omnisharp.enableRoslynAnalyzers": true,
+  "omnisharp.enableImportCompletion": true,
+  "omnisharp.organizeImportsOnFormat": true,
+  "omnisharp.enableAsyncCompletion": true,
+  "omnisharp.useModernNetForSolution": true,
+
+  // OmniSharp logging (helpful for troubleshooting)
+  "omnisharp.loggingLevel": "information",
+
+  // Code lens (shows references and implementations inline)
+  "csharp.referencesCodeLens.enabled": true,
+  "csharp.testsCodeLens.enabled": true,
+
+  // Inlay hints (inline parameter names and types)
+  "csharp.inlayHints.parameters.enabled": true,
+  "csharp.inlayHints.parameters.forLiteralParameters": true,
+  "csharp.inlayHints.parameters.forObjectCreationParameters": true,
+  "csharp.inlayHints.types.enabled": true,
+  "csharp.inlayHints.types.forImplicitVariableTypes": true,
+
+  // Format on save
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+
+  // C# specific formatting
+  "[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true
+  },
+
+  // Show navigation breadcrumbs
+  "breadcrumbs.enabled": true,
+
+  // Enable Go to Definition, Peek Definition, etc.
+  "editor.gotoLocation.multipleDefinitions": "goto",
+  "editor.gotoLocation.multipleImplementations": "goto",
+
+  // File exclusions (reduce noise)
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/.vs": true
+  },
+
+  // Search exclusions
+  "search.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/.vs": true,
+    "**/node_modules": true
+  }
+}

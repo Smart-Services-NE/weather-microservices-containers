@@ -1,0 +1,110 @@
+[
+  {
+    "messageId": "test-critical-heat",
+    "subject": "⚠️ CRITICAL: Extreme Heat Emergency",
+    "body": "",
+    "recipient": "your-email@example.com",
+    "timestamp": 1735689600000,
+    "alertType": "TEMPERATURE_EXTREME",
+    "severity": "CRITICAL",
+    "location": {
+      "zipCode": "85001",
+      "city": "Phoenix",
+      "state": "Arizona",
+      "latitude": 33.4484,
+      "longitude": -112.0740
+    },
+    "weatherConditions": {
+      "currentTemperature": 48.0,
+      "weatherCode": 0,
+      "weatherDescription": "Clear sky - Extreme heat advisory",
+      "windSpeed": 8.0,
+      "precipitation": 0.0
+    },
+    "metadata": {
+      "from": "emergency-alerts@weather.gov",
+      "priority": "critical"
+    }
+  },
+  {
+    "messageId": "test-severe-storm",
+    "subject": "Severe Thunderstorm Warning",
+    "body": "",
+    "recipient": "your-email@example.com",
+    "timestamp": 1735689700000,
+    "alertType": "SEVERE_WEATHER",
+    "severity": "SEVERE",
+    "location": {
+      "zipCode": "94105",
+      "city": "San Francisco",
+      "state": "California",
+      "latitude": 37.7749,
+      "longitude": -122.4194
+    },
+    "weatherConditions": {
+      "currentTemperature": 15.5,
+      "weatherCode": 95,
+      "weatherDescription": "Thunderstorm with heavy hail",
+      "windSpeed": 65.0,
+      "precipitation": 35.2
+    },
+    "metadata": {
+      "from": "storm-alerts@weatherapp.com",
+      "priority": "high"
+    }
+  },
+  {
+    "messageId": "test-warning-wind",
+    "subject": "High Wind Warning",
+    "body": "",
+    "recipient": "your-email@example.com",
+    "timestamp": 1735689800000,
+    "alertType": "WIND_WARNING",
+    "severity": "WARNING",
+    "location": {
+      "zipCode": "60601",
+      "city": "Chicago",
+      "state": "Illinois",
+      "latitude": 41.8781,
+      "longitude": -87.6298
+    },
+    "weatherConditions": {
+      "currentTemperature": 2.0,
+      "weatherCode": 3,
+      "weatherDescription": "Overcast with gusty winds",
+      "windSpeed": 88.5,
+      "precipitation": 0.0
+    },
+    "metadata": {
+      "from": "wind-alerts@weatherapp.com",
+      "priority": "medium"
+    }
+  },
+  {
+    "messageId": "test-info-forecast",
+    "subject": "Daily Weather Forecast",
+    "body": "",
+    "recipient": "cnabilou@gmail.com",
+    "timestamp": 1735689900000,
+    "alertType": "GENERAL_ALERT",
+    "severity": "INFO",
+    "location": {
+      "zipCode": "98101",
+      "city": "Seattle",
+      "state": "Washington",
+      "latitude": 47.6062,
+      "longitude": -122.3321
+    },
+    "weatherConditions": {
+      "currentTemperature": 18.5,
+      "weatherCode": 2,
+      "weatherDescription": "Partly cloudy with light rain",
+      "windSpeed": 15.0,
+      "precipitation": 2.5
+    },
+    "metadata": {
+      "from": "daily-forecast@weatherapp.com",
+      "priority": "low"
+    }
+  }
+]

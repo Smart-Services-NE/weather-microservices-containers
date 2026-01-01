@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using Avro.Generic;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
 using Microsoft.Extensions.Configuration;
@@ -9,10 +10,11 @@ namespace NotificationService.Utilities;
 
 /// <summary>
 /// Kafka consumer utility that deserializes Avro messages using Confluent Schema Registry
+/// Supports multiple Avro schemas: weather-alert.avsc and notification-message.avsc
 /// </summary>
 public class AvroKafkaConsumerUtility : IKafkaConsumerUtility, IDisposable
 {
-    private readonly IConsumer<string, AvroNotificationMessage> _consumer;
+    private readonly IConsumer<string, GenericRecord> _consumer;
     private readonly ISchemaRegistryClient _schemaRegistryClient;
     private readonly ILogger<AvroKafkaConsumerUtility> _logger;
     private string _currentTopic = string.Empty;
@@ -79,11 +81,12 @@ public class AvroKafkaConsumerUtility : IKafkaConsumerUtility, IDisposable
         // Create Schema Registry Client
         _schemaRegistryClient = new CachedSchemaRegistryClient(schemaRegistryConfig);
 
-        // Build Consumer with Avro Deserializer (wrapped for sync operation)
-        var asyncAvroDeserializer = new AvroDeserializer<AvroNotificationMessage>(_schemaRegistryClient);
+        // Build Consumer with GenericRecord Avro Deserializer (wrapped for sync operation)
+        // GenericRecord allows us to deserialize any Avro schema at runtime
+        var asyncAvroDeserializer = new AvroDeserializer<GenericRecord>(_schemaRegistryClient);
 
-        _consumer = new ConsumerBuilder<string, AvroNotificationMessage>(consumerConfig)
-            .SetValueDeserializer(new SyncOverAsyncDeserializer<AvroNotificationMessage>(asyncAvroDeserializer))
+        _consumer = new ConsumerBuilder<string, GenericRecord>(consumerConfig)
+            .SetValueDeserializer(new SyncOverAsyncDeserializer<GenericRecord>(asyncAvroDeserializer))
             .SetErrorHandler((_, e) =>
             {
                 _logger.LogError("Kafka consumer error: {Reason}. Code: {Code}", e.Reason, e.Code);
@@ -120,12 +123,23 @@ public class AvroKafkaConsumerUtility : IKafkaConsumerUtility, IDisposable
 
             _currentTopic = consumeResult.Topic;
 
-            // Convert Avro DTO to domain model
-            var avroMessage = consumeResult.Message.Value;
-            var notificationMessage = avroMessage.ToNotificationMessage(consumeResult.Topic);
+            // Get the GenericRecord and determine schema type
+            var genericRecord = consumeResult.Message.Value;
+            var schemaName = genericRecord.Schema.Name;
+
+            _logger.LogDebug("Detected Avro schema: {SchemaName}", schemaName);
+
+            // Route to appropriate mapper based on schema name
+            var notificationMessage = schemaName switch
+            {
+                "WeatherAlert" => MapWeatherAlertRecord(genericRecord, consumeResult.Topic),
+                "NotificationMessage" => MapSimpleRecord(genericRecord, consumeResult.Topic),
+                _ => throw new InvalidOperationException($"Unknown Avro schema: {schemaName}. Expected 'WeatherAlert' or 'NotificationMessage'")
+            };
 
             _logger.LogInformation(
-                "Successfully deserialized Avro message: MessageId={MessageId}, Subject={Subject}",
+                "Successfully deserialized {SchemaName} message: MessageId={MessageId}, Subject={Subject}",
+                schemaName,
                 notificationMessage.MessageId,
                 notificationMessage.Subject);
 
@@ -166,6 +180,140 @@ public class AvroKafkaConsumerUtility : IKafkaConsumerUtility, IDisposable
     {
         _consumer.Close();
         _logger.LogInformation("Kafka consumer closed");
+    }
+
+    /// <summary>
+    /// Maps WeatherAlert Avro schema to NotificationMessage domain model
+    /// </summary>
+    private NotificationMessage MapWeatherAlertRecord(GenericRecord record, string topic)
+    {
+        // Extract base notification fields
+        var messageId = (string)record["messageId"];
+        var subject = (string)record["subject"];
+        var body = (string)record["body"];
+        var recipient = (string)record["recipient"];
+        var timestamp = DateTimeOffset.FromUnixTimeMilliseconds((long)record["timestamp"]).UtcDateTime;
+
+        // Extract metadata (nullable map)
+        var metadata = ExtractMetadata(record["metadata"]);
+
+        // Extract weather-specific fields
+        var alertType = MapAlertType(record["alertType"]);
+        var severity = MapSeverity(record["severity"]);
+
+        // Extract location record
+        var locationRecord = (GenericRecord)record["location"];
+        var location = new LocationData(
+            (string)locationRecord["zipCode"],
+            locationRecord["city"] as string,
+            locationRecord["state"] as string,
+            locationRecord["latitude"] as double?,
+            locationRecord["longitude"] as double?
+        );
+
+        // Extract weather conditions record
+        var weatherConditionsRecord = (GenericRecord)record["weatherConditions"];
+        var weatherConditions = new WeatherConditionsData(
+            weatherConditionsRecord["currentTemperature"] as double?,
+            weatherConditionsRecord["weatherCode"] as int?,
+            weatherConditionsRecord["weatherDescription"] as string,
+            weatherConditionsRecord["windSpeed"] as double?,
+            weatherConditionsRecord["precipitation"] as double?
+        );
+
+        // Create weather alert data
+        var weatherData = new WeatherAlertData(alertType, severity, location, weatherConditions);
+
+        return new NotificationMessage(
+            messageId,
+            topic,
+            subject,
+            body,
+            recipient,
+            timestamp,
+            metadata,
+            weatherData
+        );
+    }
+
+    /// <summary>
+    /// Maps simple NotificationMessage Avro schema to NotificationMessage domain model
+    /// </summary>
+    private NotificationMessage MapSimpleRecord(GenericRecord record, string topic)
+    {
+        var messageId = (string)record["messageId"];
+        var subject = (string)record["subject"];
+        var body = (string)record["body"];
+        var recipient = (string)record["recipient"];
+        var timestamp = DateTimeOffset.FromUnixTimeMilliseconds((long)record["timestamp"]).UtcDateTime;
+
+        var metadata = ExtractMetadata(record["metadata"]);
+
+        return new NotificationMessage(
+            messageId,
+            topic,
+            subject,
+            body,
+            recipient,
+            timestamp,
+            metadata,
+            null // No weather data for simple messages
+        );
+    }
+
+    /// <summary>
+    /// Extracts metadata map from Avro record (handles nullable map)
+    /// </summary>
+    private Dictionary<string, string>? ExtractMetadata(object? metadataObject)
+    {
+        if (metadataObject == null)
+        {
+            return null;
+        }
+
+        if (metadataObject is IDictionary<string, object> metadataDict)
+        {
+            return metadataDict.ToDictionary(
+                kv => kv.Key,
+                kv => kv.Value?.ToString() ?? string.Empty
+            );
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Maps Avro alert type enum to domain AlertType enum
+    /// </summary>
+    private AlertType MapAlertType(object avroEnum)
+    {
+        var enumValue = avroEnum.ToString();
+        return enumValue switch
+        {
+            "SEVERE_WEATHER" => AlertType.SevereWeather,
+            "TEMPERATURE_EXTREME" => AlertType.TemperatureExtreme,
+            "PRECIPITATION_HEAVY" => AlertType.PrecipitationHeavy,
+            "WIND_WARNING" => AlertType.WindWarning,
+            "STORM_WARNING" => AlertType.StormWarning,
+            "GENERAL_ALERT" => AlertType.GeneralAlert,
+            _ => AlertType.GeneralAlert // Default fallback
+        };
+    }
+
+    /// <summary>
+    /// Maps Avro severity enum to domain Severity enum
+    /// </summary>
+    private Severity MapSeverity(object avroEnum)
+    {
+        var enumValue = avroEnum.ToString();
+        return enumValue switch
+        {
+            "INFO" => Severity.Info,
+            "WARNING" => Severity.Warning,
+            "SEVERE" => Severity.Severe,
+            "CRITICAL" => Severity.Critical,
+            _ => Severity.Info // Default fallback
+        };
     }
 
     public void Dispose()

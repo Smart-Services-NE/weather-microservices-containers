@@ -7,5 +7,6 @@ public record NotificationMessage(
     string Body,
     string Recipient,
     DateTime Timestamp,
-    Dictionary<string, string>? Metadata = null
+    Dictionary<string, string>? Metadata = null,
+    WeatherAlertData? WeatherData = null
 );
