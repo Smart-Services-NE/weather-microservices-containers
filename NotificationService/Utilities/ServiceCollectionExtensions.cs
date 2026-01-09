@@ -13,6 +13,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITelemetryUtility, TelemetryUtility>();
         services.AddScoped<IRetryPolicyUtility, RetryPolicyUtility>();
 
+        // Register Kafka producer (singleton - reuse producer across requests)
+        services.AddSingleton<IKafkaProducerUtility, KafkaProducerUtility>();
+
         // Use Avro consumer if explicitly enabled, otherwise use JSON consumer
         var useAvroConsumer = configuration.GetValue<bool>("Kafka:UseAvroConsumer", defaultValue: false);
 

@@ -10,6 +10,7 @@ public class NotificationManager : INotificationManager
     private readonly INotificationStorageAccessor _storageAccessor;
     private readonly IRetryPolicyUtility _retryPolicyUtility;
     private readonly ITelemetryUtility _telemetryUtility;
+    private readonly IKafkaProducerUtility _kafkaProducerUtility;
     private readonly ILogger<NotificationManager> _logger;
 
     public NotificationManager(
@@ -18,6 +19,7 @@ public class NotificationManager : INotificationManager
         INotificationStorageAccessor storageAccessor,
         IRetryPolicyUtility retryPolicyUtility,
         ITelemetryUtility telemetryUtility,
+        IKafkaProducerUtility kafkaProducerUtility,
         ILogger<NotificationManager> logger)
     {
         _notificationEngine = notificationEngine;
@@ -25,6 +27,7 @@ public class NotificationManager : INotificationManager
         _storageAccessor = storageAccessor;
         _retryPolicyUtility = retryPolicyUtility;
         _telemetryUtility = telemetryUtility;
+        _kafkaProducerUtility = kafkaProducerUtility;
         _logger = logger;
     }
 
@@ -123,6 +126,16 @@ public class NotificationManager : INotificationManager
 
                 sentRecord = await _storageAccessor.UpdateAsync(sentRecord, cancellationToken);
 
+                // Publish to Kafka for Cosmos DB sync (fire-and-forget)
+                try
+                {
+                    await _kafkaProducerUtility.PublishNotificationRecordAsync(sentRecord, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish notification record to Kafka: MessageId={MessageId}", message.MessageId);
+                }
+
                 _telemetryUtility.RecordMetric("notification.sent", 1);
 
                 _logger.LogInformation(
@@ -144,6 +157,16 @@ public class NotificationManager : INotificationManager
                 };
 
                 failedRecord = await _storageAccessor.UpdateAsync(failedRecord, cancellationToken);
+
+                // Publish failed record to Kafka
+                try
+                {
+                    await _kafkaProducerUtility.PublishNotificationRecordAsync(failedRecord, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish failed notification record to Kafka");
+                }
 
                 _telemetryUtility.RecordMetric("notification.failed", 1);
 
@@ -219,6 +242,16 @@ public class NotificationManager : INotificationManager
 
                 await _storageAccessor.UpdateAsync(sentRecord, cancellationToken);
 
+                // Publish retried record
+                try
+                {
+                    await _kafkaProducerUtility.PublishNotificationRecordAsync(sentRecord, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish retried notification to Kafka");
+                }
+
                 _telemetryUtility.RecordMetric("notification.retry.success", 1);
 
                 return new NotificationResult(
@@ -235,6 +268,16 @@ public class NotificationManager : INotificationManager
                 };
 
                 await _storageAccessor.UpdateAsync(failedRecord, cancellationToken);
+
+                // Publish failed retry record
+                try
+                {
+                    await _kafkaProducerUtility.PublishNotificationRecordAsync(failedRecord, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to publish failed retry to Kafka");
+                }
 
                 _telemetryUtility.RecordMetric("notification.retry.failed", 1);
 

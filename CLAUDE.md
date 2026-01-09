@@ -9,6 +9,31 @@ This is a containerized microservices application consisting of:
 - **WeatherWeb**: Web frontend for weather forecasts (uses Dapr for service invocation)
 - **NotificationService**: Kafka-based notification service for email alerts
 
+## Documentation
+
+All project documentation is organized in the `docs/` folder:
+
+- **[Documentation Hub](docs/README.md)** - Main navigation and overview
+- **[Documentation Guidelines](docs/DOCUMENTATION_GUIDELINES.md)** - Standards for creating/updating docs
+
+**Documentation Structure**:
+```
+docs/
+├── getting-started/     # Setup and onboarding guides
+├── kafka/              # Kafka and messaging documentation
+├── services/           # Service-specific documentation
+├── infrastructure/     # Infrastructure components
+└── scripts/            # Automation and tooling
+```
+
+**Key Documentation Principles**:
+- **Concise** - Remove redundancy, keep content focused
+- **Connected** - Cross-reference related documents
+- **Consolidated** - Group related topics together
+- **Current** - Keep updated with code changes
+
+When creating or updating documentation, always follow the patterns in [Documentation Guidelines](docs/DOCUMENTATION_GUIDELINES.md).
+
 ## Architecture Principles
 
 ### IDesign Layered Architecture

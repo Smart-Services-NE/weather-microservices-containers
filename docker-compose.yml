@@ -99,6 +99,75 @@ services:
       retries: 5
       start_period: 30s
 
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:7.5.0
+    container_name: containerapp-kafka-connect-1
+    depends_on:
+      kafka:
+        condition: service_healthy
+      azurite:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      # Basic Connect configuration
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9093
+      CONNECT_REST_PORT: 8083
+      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+      CONNECT_GROUP_ID: "azurite-sink-group"
+
+      # Storage topics (1 replica for local dev)
+      CONNECT_CONFIG_STORAGE_TOPIC: "connect-configs"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_TOPIC: "connect-offsets"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: "connect-status"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+
+      # JSON converters (no schema)
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+
+      # Plugin path
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+
+      # Azure Storage credentials (for optional blob sink connector)
+      AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING}
+      AZURE_STORAGE_ACCOUNT: ${AZURE_STORAGE_ACCOUNT:-devstoreaccount1}
+      AZURE_STORAGE_KEY: ${AZURE_STORAGE_KEY}
+
+      # Logging
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+
+    volumes:
+      - ./kafka-connect/connectors:/usr/share/confluent-hub-components
+      - ./kafka-connect/config:/etc/kafka-connect
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+    networks:
+      - default
+
+    # Note: Kafka Connect is optional since NotificationService consumes directly from Kafka
+    # To install Azure Blob Storage sink connector (optional):
+    # confluent-hub install --no-prompt confluentinc/kafka-connect-azure-blob-storage:1.6.0
+    command:
+      - bash
+      - -c
+      - |
+        echo "Kafka Connect ready for custom connectors..."
+        echo "NotificationService consumes from Kafka and writes to Azurite Table Storage directly"
+        /etc/confluent/docker/run
+
   notification-api:
     build:
       context: .
@@ -183,3 +252,27 @@ services:
         condition: service_healthy
     networks:
       - default
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    container_name: containerapp-azurite-1
+    ports:
+      - "10000:10000"  # Blob service
+      - "10001:10001"  # Queue service
+      - "10002:10002"  # Table service
+    environment:
+      - AZURITE_ACCOUNTS=devstoreaccount1:Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==
+    volumes:
+      - azurite-data:/data
+    command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --location /data --debug /data/debug.log
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:10000 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  azurite-data:
