@@ -1,0 +1,35 @@
+{
+  "name": "notification-cosmos-sink",
+  "config": {
+    "connector.class": "com.azure.cosmos.kafka.connect.sink.CosmosDBSinkConnector",
+    "tasks.max": "2",
+
+    "topics": "notification-records",
+
+    "connect.cosmos.connection.endpoint": "${env:COSMOS_ENDPOINT}",
+    "connect.cosmos.master.key": "${env:COSMOS_MASTER_KEY}",
+    "connect.cosmos.databasename": "${env:COSMOS_DATABASE_NAME}",
+    "connect.cosmos.containers.topicmap": "notification-records#${env:COSMOS_CONTAINER_NAME}",
+
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": false,
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
+
+    "connect.cosmos.sink.write.strategy": "ItemOverwrite",
+    "connect.cosmos.sink.id.strategy": "ProvidedInValueStrategy",
+    "connect.cosmos.sink.bulk.enabled": true,
+    "connect.cosmos.sink.bulk.maxConcurrentOperations": 100,
+
+    "connect.cosmos.connection.gateway.enabled": false,
+    "connect.cosmos.sink.maxRetryCount": 10,
+
+    "errors.tolerance": "all",
+    "errors.log.enable": true,
+    "errors.log.include.messages": true,
+
+    "errors.deadletterqueue.topic.name": "notification-records-dlq",
+    "errors.deadletterqueue.topic.replication.factor": 1,
+    "errors.deadletterqueue.context.headers.enable": true
+  }
+}

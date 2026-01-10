@@ -1,0 +1,2 @@
+# Python dependencies for Confluent Cloud producers
+confluent-kafka[avro]==2.6.1
