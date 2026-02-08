@@ -35,7 +35,7 @@ KAFKA_SCHEMA_REGISTRY_SECRET=YOUR_SR_API_SECRET
 
 ### 3. Update Docker Compose
 
-Add to `docker-compose.yml` under notification-api:
+Add to `podman compose.yml` under notification-api:
 
 ```yaml
 notification-api:
@@ -49,9 +49,9 @@ notification-api:
 ### 4. Rebuild and Restart
 
 ```bash
-docker-compose build --no-cache notification-api
-docker-compose up -d notification-api
-docker-compose logs -f notification-api | head -30
+podman compose build --no-cache notification-api
+podman compose up -d notification-api
+podman compose logs -f notification-api | head -30
 ```
 
 ### 5. Verify Success
@@ -135,7 +135,7 @@ The `AvroNotificationMessage` class matches the `notification-message.avsc` sche
 ### Verify Processing
 
 ```bash
-docker-compose logs -f notification-api | grep "Successfully deserialized Avro"
+podman compose logs -f notification-api | grep "Successfully deserialized Avro"
 ```
 
 ## Troubleshooting
@@ -171,7 +171,7 @@ curl -u "$KAFKA_SCHEMA_REGISTRY_KEY:$KAFKA_SCHEMA_REGISTRY_SECRET" \
 **Solution**: Ensure Schema Registry environment variables are loaded:
 
 ```bash
-docker-compose exec notification-api env | grep SCHEMA_REGISTRY
+podman compose exec notification-api env | grep SCHEMA_REGISTRY
 ```
 
 ## Benefits

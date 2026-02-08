@@ -98,7 +98,7 @@ Python scripts for testing and automation.
 ```bash
 # Clone and start
 cd /Users/ghostair/Projects/containerApp
-docker-compose up -d --build
+podman compose up -d --build
 
 # Access services
 open http://localhost:8081  # WeatherWeb
@@ -123,7 +123,7 @@ python3 scripts/produce-weather-alerts.py --severity CRITICAL
 
 ```bash
 # View logs
-docker-compose logs -f notification-api
+podman compose logs -f notification-api
 
 # Check health
 curl http://localhost:8082/health
@@ -139,7 +139,7 @@ open http://localhost:9411
 
 ```bash
 # Rebuild in debug mode
-docker-compose -f docker-compose.yml -f docker-compose.debug.yml up -d --build notification-api
+podman compose -f podman compose.yml -f podman compose.debug.yml up -d --build notification-api
 
 # In VS Code: F5 → "Docker: Attach to NotificationService"
 # Set breakpoints, send test message
@@ -206,7 +206,7 @@ All services implement:
 
 | Issue | Solution |
 |-------|----------|
-| Services won't start | `docker-compose down -v && docker-compose up -d --build` |
+| Services won't start | `podman compose down -v && podman compose up -d --build` |
 | Port already in use | `lsof -i :8080` then `kill -9 <PID>` |
 | Kafka auth failed | Check `.env` credentials |
 | 0x00 JSON error | Send JSON (not Avro) or configure Schema Registry |
@@ -216,13 +216,13 @@ All services implement:
 
 ```bash
 # Check all services
-docker-compose ps
+podman compose ps
 
 # View logs for specific service
-docker-compose logs -f notification-api
+podman compose logs -f notification-api
 
 # Check Kafka connectivity
-docker-compose exec notification-api env | grep KAFKA
+podman compose exec notification-api env | grep KAFKA
 
 # View database records
 curl http://localhost:8082/api/notifications/pending

@@ -117,7 +117,7 @@ NotificationService/
 ## Technology Stack
 
 ### Infrastructure
-- **Docker Compose**: Orchestrates all services
+- **Podman Compose**: Orchestrates all services
 - **Dapr**: Service invocation and resiliency (sidecars for each service)
 - **Kafka**: Message streaming (Confluent with Zookeeper)
 - **Zipkin**: Distributed tracing
@@ -255,40 +255,41 @@ public static IServiceCollection AddServiceNameManagers(this IServiceCollection 
 - Use Polly ResiliencePipeline with jitter
 - Manual Kafka offset commit (only after successful processing)
 
-## Docker and Deployment
+## Podman and Deployment
 
 ### Running the Application
 ```bash
 # Start all services
-docker-compose up -d
+podman compose up -d
 
 # View logs for specific service
-docker-compose logs -f notification-api
+podman compose logs -f notification-api
 
 # View logs for Dapr sidecar
-docker-compose logs -f notification-api-dapr
+podman compose logs -f notification-api-dapr
 
 # Check service health
 curl http://localhost:8082/health
 
 # Stop all services
-docker-compose down
+podman compose down
 
 # Stop and remove volumes (clean state)
-docker-compose down -v
+podman compose down -v
 ```
 
-### NotificationService Docker Configuration
+### NotificationService Podman Configuration
 - **Image**: Built from multi-stage Dockerfile (SDK 10.0 → Runtime 10.0)
 - **Port**: 8082 (maps to container port 8080)
 - **Health Check**: HTTP GET to `/health` endpoint every 30s
-- **Database**: SQLite persisted in Docker volume (`./notification-data:/app/data`)
+- **Database**: SQLite persisted in Podman volume (`./notification-data:/app/data`)
 - **Dapr Integration**:
   - App protocol: HTTP (for Dapr-to-app communication)
   - gRPC port 50003 for service invocation
   - Cloud Events support enabled
   - Pub/Sub subscribe handler registered
   - Depends on healthy app container before starting
+
 
 ### Service Ports
 - WeatherWeb: 8081
@@ -378,7 +379,7 @@ public async Task<Data> GetDataAsync(Request request, CancellationToken ct)
 ### Database Migrations
 - NotificationService uses SQLite with `EnsureCreated()` on startup
 - For production, replace with proper migrations
-- Database file stored in `/app/data` (Docker volume mounted)
+- Database file stored in `/app/data` (Podman volume mounted)
 
 ### Email Configuration
 - Configure SMTP settings in `appsettings.json`
@@ -393,18 +394,18 @@ public async Task<Data> GetDataAsync(Request request, CancellationToken ct)
 - Use `Microsoft.Extensions.DependencyInjection.Abstractions` version `10.0.1`
 
 ### Kafka Connection Issues
-- Verify Kafka is running: `docker-compose logs kafka`
+- Verify Kafka is running: `podman compose logs kafka`
 - Check bootstrap servers: Inside containers use `kafka:9093`, localhost use `localhost:9092`
 - Verify topics exist: `kafka-topics --list --bootstrap-server localhost:9092`
 
-### Dapr Issues
-- Check Dapr sidecars are running: `docker-compose ps`
+### Podman Issues
+- Check Podman sidecars are running: `podman compose ps`
 - Verify Dapr placement service is healthy
-- Check Dapr logs: `docker-compose logs weather-api-dapr`
+- Check Dapr logs: `podman compose logs weather-api-dapr`
 
 ## Adding a New Service
 
-**CRITICAL REQUIREMENT**: All new services MUST be containerized using Docker and integrated with Dapr using gRPC for service invocation.
+**CRITICAL REQUIREMENT**: All new services MUST be containerized using Podman and integrated with Dapr using gRPC for service invocation.
 
 When adding a new microservice to this project:
 
@@ -441,11 +442,11 @@ public static IServiceCollection AddServiceNameManagers(this IServiceCollection 
 
 ### 4. Containerization (MANDATORY)
 
-#### A. Create Dockerfile
-**Location**: `ServiceName/Clients/WebApi/Dockerfile`
+#### A. Create Containerfile
+**Location**: `ServiceName/Clients/WebApi/Containerfile`
 
 **Template**:
-```dockerfile
+```podman
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
@@ -479,15 +480,15 @@ COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "ServiceName.Api.dll"]
 ```
 
-#### B. Add to docker-compose.yml
-Add BOTH the service container AND its Dapr sidecar:
+#### B. Add to compose.yaml
+Add BOTH the service container AND its Dapr sidecar (Podman native):
 
 ```yaml
 # Service Container
 service-name-api:
   build:
     context: .
-    dockerfile: ServiceName/Clients/WebApi/Dockerfile
+    dockerfile: ServiceName/Clients/WebApi/Containerfile
   container_name: containerapp-service-name-api-1
   ports:
     - "80XX:8080"  # Use next available port (8083, 8084, etc.)
@@ -691,9 +692,9 @@ Update this CLAUDE.md with:
 
 Before considering a new service complete, verify:
 
-- [ ] Dockerfile created with multi-stage build (SDK → Runtime)
-- [ ] Service added to docker-compose.yml with health checks
-- [ ] Dapr sidecar configured in docker-compose.yml
+- [ ] Containerfile created with multi-stage build (SDK → Runtime)
+- [ ] Service added to compose.yaml with health checks
+- [ ] Dapr sidecar configured in compose.yaml
 - [ ] gRPC port assigned for service invocation
 - [ ] Program.cs includes `AddDaprClient()` and `.AddDapr()`
 - [ ] Cloud Events enabled with `UseCloudEvents()`
@@ -701,7 +702,7 @@ Before considering a new service complete, verify:
 - [ ] Health check endpoint mapped at `/health`
 - [ ] Prometheus metrics endpoint mapped
 - [ ] Service communication uses DaprClient for inter-service calls
-- [ ] Environment variables configured in docker-compose.yml
+- [ ] Environment variables configured in compose.yaml
 - [ ] Data volumes mounted for persistence (if needed)
 - [ ] Service depends on required infrastructure (Kafka, databases, etc.)
 - [ ] CLAUDE.md updated with service details and port assignments

@@ -148,7 +148,7 @@ python3 scripts/produce-weather-alerts.py --count 10
 ### Watch Service Logs
 
 ```bash
-docker-compose logs -f notification-api | grep -E "(Successfully deserialized|Email sent)"
+podman compose logs -f notification-api | grep -E "(Successfully deserialized|Email sent)"
 ```
 
 **Expected Output**:
@@ -160,7 +160,7 @@ docker-compose logs -f notification-api | grep -E "(Successfully deserialized|Em
 ### Check Database
 
 ```bash
-docker exec -it containerapp-notification-api-1 sqlite3 /app/data/notifications.db \
+podman exec -it containerapp-notification-api-1 sqlite3 /app/data/notifications.db \
   "SELECT MessageId, Subject, Status, CreatedAt FROM Notifications ORDER BY CreatedAt DESC LIMIT 5;"
 ```
 
@@ -237,7 +237,7 @@ curl -u "$SR_KEY:$SR_SECRET" \
 1. SMTP configured in NotificationService
 2. Check spam folder
 3. Verify recipient email address
-4. Check service logs: `docker-compose logs notification-api | grep -i smtp`
+4. Check service logs: `podman compose logs notification-api | grep -i smtp`
 
 ## Advanced Usage
 

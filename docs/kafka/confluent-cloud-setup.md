@@ -39,7 +39,7 @@ KAFKA_SASL_PASSWORD=YOUR_API_SECRET
 
 ### 4. Update Docker Compose
 
-Update `docker-compose.yml` for notification-api:
+Update `podman compose.yml` for notification-api:
 
 ```yaml
 notification-api:
@@ -69,9 +69,9 @@ In Confluent Cloud Console:
 ### 6. Start the Service
 
 ```bash
-docker-compose build notification-api
-docker-compose up -d notification-api
-docker-compose logs -f notification-api
+podman compose build notification-api
+podman compose up -d notification-api
+podman compose logs -f notification-api
 ```
 
 You should see: `Subscribed to Kafka topics: weather-alerts, general-events`
@@ -101,7 +101,7 @@ You should see: `Subscribed to Kafka topics: weather-alerts, general-events`
 ### Verify Processing
 
 ```bash
-docker-compose logs notification-api | grep "Notification sent successfully"
+podman compose logs notification-api | grep "Notification sent successfully"
 ```
 
 ## Troubleshooting
@@ -121,7 +121,7 @@ docker-compose logs notification-api | grep "Notification sent successfully"
 
 ```bash
 # Check loaded environment variables
-docker-compose exec notification-api env | grep KAFKA
+podman compose exec notification-api env | grep KAFKA
 
 # Enable debug logging in appsettings.json
 {

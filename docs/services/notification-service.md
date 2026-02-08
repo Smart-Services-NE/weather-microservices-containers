@@ -34,19 +34,19 @@ The service implements full observability using:
 
 ```bash
 # All logs
-docker-compose logs -f notification-api
+podman compose logs -f notification-api
 
 # Last 100 lines
-docker-compose logs --tail=100 notification-api
+podman compose logs --tail=100 notification-api
 
 # Only errors
-docker-compose logs notification-api | grep -i error
+podman compose logs notification-api | grep -i error
 
 # Warnings and errors
-docker-compose logs notification-api | grep -iE "warn|error"
+podman compose logs notification-api | grep -iE "warn|error"
 
 # Track specific message
-docker-compose logs notification-api | grep "MessageId=test-001"
+podman compose logs notification-api | grep "MessageId=test-001"
 ```
 
 ### Log Patterns
@@ -186,7 +186,7 @@ curl http://localhost:8082/health
 
 | Indicator | Log Pattern | Action |
 |-----------|-------------|--------|
-| Service down | No health check response | `docker-compose ps notification-api` |
+| Service down | No health check response | `podman compose ps notification-api` |
 | Kafka disconnected | `Group authorization failed` | Verify Confluent Cloud ACL permissions |
 | Database errors | `Database error` | Check SQLite file permissions, disk space |
 | SMTP failures | `SMTP error` | Verify email configuration, credentials |
@@ -214,40 +214,40 @@ curl http://localhost:8082/health
 ### Service Not Starting
 
 ```bash
-docker-compose build --no-cache notification-api
-docker-compose up -d notification-api
-docker-compose logs notification-api | head -50
+podman compose build --no-cache notification-api
+podman compose up -d notification-api
+podman compose logs notification-api | head -50
 ```
 
 ### High Error Rate
 
 ```bash
 # Check SMTP configuration
-docker-compose logs notification-api | grep "Email__"
+podman compose logs notification-api | grep "Email__"
 
 # Test SMTP connectivity
-docker-compose exec notification-api ping smtp.gmail.com
+podman compose exec notification-api ping smtp.gmail.com
 ```
 
 ### Kafka Connection Issues
 
 ```bash
 # Verify environment variables
-docker-compose exec notification-api env | grep KAFKA
+podman compose exec notification-api env | grep KAFKA
 
 # Check connectivity
-docker-compose logs notification-api | grep "Bootstrap"
+podman compose logs notification-api | grep "Bootstrap"
 ```
 
 ### Database Issues
 
 ```bash
 # Check database file
-docker-compose exec notification-api ls -l /app/data/
+podman compose exec notification-api ls -l /app/data/
 
 # Remove corrupted database (recreates on restart)
 rm notification-data/notifications.db
-docker-compose restart notification-api
+podman compose restart notification-api
 ```
 
 ### No Traces in Zipkin
@@ -268,7 +268,7 @@ Before escalating an issue, collect:
 
 ```bash
 # Service logs (last 500 lines)
-docker-compose logs --tail=500 notification-api > notification-logs.txt
+podman compose logs --tail=500 notification-api > notification-logs.txt
 
 # Current metrics
 curl http://localhost:8082/metrics > notification-metrics.txt
@@ -277,7 +277,7 @@ curl http://localhost:8082/metrics > notification-metrics.txt
 curl http://localhost:8082/health > notification-health.json
 
 # Recent errors
-docker-compose logs notification-api | grep -i error | tail -50 > recent-errors.txt
+podman compose logs notification-api | grep -i error | tail -50 > recent-errors.txt
 ```
 
 ## Configuration

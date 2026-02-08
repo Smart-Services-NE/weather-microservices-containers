@@ -160,7 +160,7 @@ For `weather-alert.avsc`, the `weatherCode` follows Open-Meteo WMO codes:
 ### Via kafka-console-producer (JSON)
 
 ```bash
-docker exec -i containerapp-kafka-1 kafka-console-producer \
+podman exec -i containerapp-kafka-1 kafka-console-producer \
   --broker-list localhost:9093 \
   --topic weather-alerts <<'EOF'
 {"messageId":"test-001","subject":"Test","body":"Test","recipient":"user@example.com","timestamp":1735574400000}
@@ -195,23 +195,23 @@ See [Weather Alert Producer Guide](../scripts/weather-alert-producer.md)
 
 ```bash
 # Start services
-docker-compose up -d
+podman compose up -d
 
 # Health check
 curl http://localhost:8082/health
 
 # Publish test message (JSON)
-docker exec -i containerapp-kafka-1 kafka-console-producer \
+podman exec -i containerapp-kafka-1 kafka-console-producer \
   --broker-list localhost:9093 \
   --topic weather-alerts <<'EOF'
 {"messageId":"test-001","subject":"Test Weather Alert","body":"Testing","recipient":"test@example.com","timestamp":1735574400000}
 EOF
 
 # Check logs
-docker-compose logs -f notification-api | grep "test-001"
+podman compose logs -f notification-api | grep "test-001"
 
 # Verify in database
-docker exec -it containerapp-notification-api-1 sqlite3 /app/data/notifications.db \
+podman exec -it containerapp-notification-api-1 sqlite3 /app/data/notifications.db \
   "SELECT * FROM Notifications WHERE MessageId='test-001';"
 ```
 
@@ -228,14 +228,14 @@ KAFKA_SCHEMA_REGISTRY_KEY=YOUR_KEY
 KAFKA_SCHEMA_REGISTRY_SECRET=YOUR_SECRET
 
 # Rebuild service
-docker-compose build --no-cache notification-api
-docker-compose up -d notification-api
+podman compose build --no-cache notification-api
+podman compose up -d notification-api
 ```
 
 ## Troubleshooting
 
 **Message not being consumed**:
-- Check Kafka is running: `docker-compose ps kafka`
+- Check Kafka is running: `podman compose ps kafka`
 - Verify topic exists: `kafka-topics --list --bootstrap-server localhost:9092`
 - Check consumer group: `kafka-consumer-groups --describe --group notification-service`
 

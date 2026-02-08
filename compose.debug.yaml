@@ -4,7 +4,7 @@
 services:
   notification-api:
     build:
-      dockerfile: NotificationService/Clients/WebApi/Dockerfile.debug
+      dockerfile: NotificationService/Clients/WebApi/Containerfile.debug
     volumes:
       # Mount source code for hot reload and source mapping
       - ./NotificationService:/src/NotificationService:ro

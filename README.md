@@ -6,7 +6,7 @@ Cloud-native .NET 10 microservices application with Dapr, Kafka, and full observ
 
 ```bash
 # Start all services
-docker-compose up -d --build
+podman compose up -d --build
 
 # Access services
 open http://localhost:8081  # WeatherWeb (Frontend)
@@ -91,7 +91,7 @@ python3 scripts/produce-weather-alerts.py --severity CRITICAL
 
 ```bash
 # View logs
-docker-compose logs -f notification-api
+podman compose logs -f notification-api
 
 # Check health
 curl http://localhost:8082/health
@@ -125,7 +125,7 @@ containerApp/
 │   └── scripts/             # Producer scripts
 ├── schemas/avro/            # Avro schemas
 ├── scripts/                 # Python producer scripts
-├── docker-compose.yml       # Service orchestration
+├── compose.yaml             # Service orchestration (Podman native)
 ├── .env.example             # Environment variables template
 └── CLAUDE.md                # Project architecture guidelines
 ```
@@ -183,7 +183,7 @@ Edit `NotificationService/Clients/WebApi/appsettings.json`:
 
 | Issue | Solution |
 |-------|----------|
-| Services won't start | `docker-compose down -v && docker-compose up -d --build` |
+| Services won't start | `podman compose down -v && podman compose up -d --build` |
 | Port already in use | `lsof -i :8080` then `kill -9 <PID>` |
 | Kafka auth failed | Check `.env` credentials |
 | 0x00 JSON error | [See troubleshooting guide](./docs/kafka/troubleshooting.md#message-format-issues) |
@@ -203,9 +203,9 @@ dotnet test
 
 ```bash
 # Rebuild in debug mode
-docker-compose -f docker-compose.yml -f docker-compose.debug.yml up -d --build notification-api
+podman compose -f docker-compose.yml -f docker-compose.debug.yml up -d --build notification-api
 
-# In VS Code: F5 → "Docker: Attach to NotificationService"
+# In VS Code: F5 → "Podman: Attach to NotificationService"
 ```
 
 📖 **[Debugging Guide](./docs/getting-started/debugging.md)**

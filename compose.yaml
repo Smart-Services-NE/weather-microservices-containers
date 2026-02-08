@@ -2,7 +2,7 @@ services:
   weather-api:
     build:
       context: ./WeatherService
-      dockerfile: Dockerfile
+      dockerfile: Containerfile
     ports:
       - "8080:8080"
     environment:
@@ -24,7 +24,7 @@ services:
   weather-web:
     build:
       context: ./WeatherWeb
-      dockerfile: Dockerfile
+      dockerfile: Containerfile
     ports:
       - "8081:8081"
     environment:
@@ -171,7 +171,7 @@ services:
   notification-api:
     build:
       context: .
-      dockerfile: NotificationService/Clients/WebApi/Dockerfile
+      dockerfile: NotificationService/Clients/WebApi/Containerfile
     ports:
       - "8082:8080"
     environment:

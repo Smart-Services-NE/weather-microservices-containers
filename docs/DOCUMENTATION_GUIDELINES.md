@@ -48,7 +48,7 @@ Fastest way to get started:
 
 ```bash
 # Example command
-docker-compose up -d
+podman compose up -d
 ```
 
 ## Detailed Guide
@@ -110,7 +110,7 @@ Always include:
 ```markdown
 ```bash
 # Brief description of what this does
-docker-compose up -d
+podman compose up -d
 
 # Expected output (if relevant)
 # Creating network "containerapp_network" ... done
@@ -207,7 +207,7 @@ When multiple docs cover related topics:
 Always specify language:
 ```markdown
 ```bash
-docker-compose up -d
+podman compose up -d
 ```
 
 ```json
@@ -410,7 +410,7 @@ See [Confluent Cloud Setup](./confluent-cloud-setup.md) for credentials.
 
 ❌ **Untested Commands**:
 ```markdown
-Just run the docker command and it should work
+Just run the podman command and it should work
 ```
 
 ❌ **Broken Links**:

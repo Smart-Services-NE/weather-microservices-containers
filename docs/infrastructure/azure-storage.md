@@ -142,19 +142,19 @@ var messages = await queueClient.ReceiveMessagesAsync(maxMessages: 10);
 
 ```bash
 # Start Azurite
-docker-compose up -d azurite
+podman compose up -d azurite
 
 # View logs
-docker-compose logs -f azurite
+podman compose logs -f azurite
 
 # Check status
-docker ps --filter "name=azurite"
+podman ps --filter "name=azurite"
 
 # Stop Azurite
-docker-compose stop azurite
+podman compose stop azurite
 
 # Remove Azurite and data
-docker-compose down -v
+podman compose down -v
 ```
 
 ## Exploring Data

@@ -83,7 +83,7 @@ Use [JSON validator](https://jsonlint.com) to check syntax.
 
 1. **Verify API Key and Secret**:
 ```bash
-docker-compose exec notification-api env | grep KAFKA_SASL
+podman compose exec notification-api env | grep KAFKA_SASL
 ```
 
 2. **Check API Key Permissions** in Confluent Cloud:
@@ -100,7 +100,7 @@ docker-compose exec notification-api env | grep KAFKA_SASL
 1. Create topics in Confluent Cloud Console
 2. Verify topic names match configuration:
 ```bash
-docker-compose exec notification-api env | grep KAFKA
+podman compose exec notification-api env | grep KAFKA
 ```
 
 ### Problem: Connection Timeout
@@ -144,7 +144,7 @@ curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" \
 1. Verify Schema Registry credentials are different from Kafka credentials
 2. Check environment variables:
 ```bash
-docker-compose exec notification-api env | grep SCHEMA_REGISTRY
+podman compose exec notification-api env | grep SCHEMA_REGISTRY
 ```
 
 ## Message Processing Issues
@@ -167,12 +167,12 @@ docker-compose exec notification-api env | grep SCHEMA_REGISTRY
 **Solutions**:
 1. **Check SMTP Configuration**:
 ```bash
-docker-compose logs notification-api | grep -i smtp
+podman compose logs notification-api | grep -i smtp
 ```
 
 2. **Test SMTP Connectivity**:
 ```bash
-docker-compose exec notification-api ping smtp.gmail.com
+podman compose exec notification-api ping smtp.gmail.com
 ```
 
 3. **Verify Email Credentials** in `appsettings.json`
@@ -186,7 +186,7 @@ docker-compose exec notification-api ping smtp.gmail.com
 # Via Confluent Cloud Console: Topics → Consumer Groups → notification-service
 
 # Or via logs
-docker-compose logs notification-api | grep "partition" | tail -20
+podman compose logs notification-api | grep "partition" | tail -20
 ```
 
 **Solutions**:
@@ -203,33 +203,33 @@ docker-compose logs notification-api | grep "partition" | tail -20
 curl http://localhost:8082/health
 
 # View logs
-docker-compose logs -f notification-api
+podman compose logs -f notification-api
 
 # Filter errors only
-docker-compose logs notification-api | grep -iE "error|exception"
+podman compose logs notification-api | grep -iE "error|exception"
 
 # Track specific message
-docker-compose logs notification-api | grep "MessageId=test-001"
+podman compose logs notification-api | grep "MessageId=test-001"
 ```
 
 ### Verify Configuration
 
 ```bash
 # Kafka settings
-docker-compose exec notification-api env | grep KAFKA
+podman compose exec notification-api env | grep KAFKA
 
 # Schema Registry settings
-docker-compose exec notification-api env | grep SCHEMA_REGISTRY
+podman compose exec notification-api env | grep SCHEMA_REGISTRY
 
 # All environment variables
-docker-compose exec notification-api env
+podman compose exec notification-api env
 ```
 
 ### Test Message Format
 
 ```bash
 # Check first bytes of message (should start with 7B for JSON '{')
-docker-compose logs notification-api | grep "Message content preview"
+podman compose logs notification-api | grep "Message content preview"
 
 # Example good JSON output:
 # Message content preview (first bytes hex): 7B-22-6D-65-73, Length: 234
@@ -243,22 +243,22 @@ docker-compose logs notification-api | grep "Message content preview"
 ### Service Not Starting
 
 ```bash
-docker-compose build --no-cache notification-api
-docker-compose up -d notification-api
-docker-compose logs notification-api | head -50
+podman compose build --no-cache notification-api
+podman compose up -d notification-api
+podman compose logs notification-api | head -50
 ```
 
 ### Reset Consumer Group (Caution: Re-processes All Messages)
 
 ```bash
 # Stop service
-docker-compose stop notification-api
+podman compose stop notification-api
 
 # Reset offsets via Confluent Cloud Console:
 # Topics → Consumer Groups → notification-service → Reset offsets
 
 # Restart service
-docker-compose up -d notification-api
+podman compose up -d notification-api
 ```
 
 ### Clear Database (Fresh Start)
@@ -268,7 +268,7 @@ docker-compose up -d notification-api
 rm notification-data/notifications.db
 
 # Restart service (database will be recreated)
-docker-compose restart notification-api
+podman compose restart notification-api
 ```
 
 ## Common Error Patterns

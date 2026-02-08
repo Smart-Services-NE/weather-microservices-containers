@@ -4,7 +4,7 @@ Get the containerApp microservices running in minutes.
 
 ## Prerequisites
 
-- Docker Desktop installed and running
+- Podman installed and running
 - .NET 10 SDK (for local development)
 - Git
 
@@ -15,10 +15,10 @@ Get the containerApp microservices running in minutes.
 cd /Users/ghostair/Projects/containerApp
 
 # Start all services
-docker-compose up -d --build
+podman compose up -d --build
 
 # Check status
-docker-compose ps
+podman compose ps
 ```
 
 ## Access Services
@@ -65,17 +65,17 @@ open http://localhost:8081
 }
 
 # Check logs
-docker-compose logs -f notification-api | grep "test-001"
+podman compose logs -f notification-api | grep "test-001"
 ```
 
 ## Stop Services
 
 ```bash
 # Stop all services
-docker-compose down
+podman compose down
 
 # Stop and remove volumes (clean state)
-docker-compose down -v
+podman compose down -v
 ```
 
 ## Architecture Overview
@@ -108,10 +108,10 @@ docker-compose down -v
 
 ### Using Local Kafka
 
-Default configuration uses local Kafka running in Docker.
+Default configuration uses local Kafka running in Podman.
 
 ```yaml
-# docker-compose.yml (already configured)
+# podman compose.yml (already configured)
 - Kafka__BootstrapServers=kafka:9093
 ```
 
@@ -120,7 +120,7 @@ Default configuration uses local Kafka running in Docker.
 See [Confluent Cloud Setup Guide](../kafka/confluent-cloud-setup.md)
 
 1. Create `.env` file with credentials
-2. Update `docker-compose.yml` environment variables
+2. Update `podman compose.yml` environment variables
 3. Comment out local kafka/zookeeper services
 
 ### Email Configuration
@@ -154,21 +154,21 @@ curl http://localhost:8080/api/weather/validate?zipcode=94105
 curl http://localhost:8082/health
 
 # All services
-docker-compose ps
+podman compose ps
 ```
 
 ### Check Logs
 
 ```bash
 # All services
-docker-compose logs
+podman compose logs
 
 # Specific service
-docker-compose logs -f weather-api
-docker-compose logs -f notification-api
+podman compose logs -f weather-api
+podman compose logs -f notification-api
 
 # Dapr sidecars
-docker-compose logs -f weather-api-dapr
+podman compose logs -f weather-api-dapr
 ```
 
 ### View Traces
@@ -199,11 +199,11 @@ kill -9 <PID>
 
 ```bash
 # Check logs
-docker-compose logs | grep -i error
+podman compose logs | grep -i error
 
 # Rebuild from scratch
-docker-compose down -v
-docker-compose up -d --build
+podman compose down -v
+podman compose up -d --build
 ```
 
 ### Can't Connect to Kafka
@@ -211,10 +211,10 @@ docker-compose up -d --build
 **Local Kafka**:
 ```bash
 # Verify Kafka is running
-docker-compose ps kafka
+podman compose ps kafka
 
 # Check logs
-docker-compose logs kafka
+podman compose logs kafka
 ```
 
 **Confluent Cloud**:
@@ -240,7 +240,7 @@ containerApp/
 ├── docs/                    # Documentation
 ├── schemas/                 # Avro schemas
 ├── scripts/                 # Python producer scripts
-├── docker-compose.yml       # Service orchestration
+├── podman compose.yml       # Service orchestration (Podman compatible)
 └── .env                     # Environment variables (create from .env.example)
 ```
 
