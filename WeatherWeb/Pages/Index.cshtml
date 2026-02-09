@@ -36,6 +36,45 @@
                     </div>
                     <div class="weather-bg"></div>
                 </div>
+
+                @if (Model.Forecast.HourlyForecasts != null && Model.Forecast.HourlyForecasts.Any())
+                {
+                    <div class="mb-5 text-start">
+                        <h3 class="h4 fw-bold mb-4 text-gradient">Hourly Forecast</h3>
+                        <div class="d-flex overflow-auto pb-3 gap-3 forecast-scroll">
+                            @foreach (var hourly in Model.Forecast.HourlyForecasts)
+                            {
+                                <div class="forecast-card p-3 rounded-4 shadow-sm text-center bg-white border">
+                                    <div class="small fw-bold text-secondary mb-2">@DateTime.Parse(hourly.Time).ToString("h tt")</div>
+                                    <div class="fs-4 fw-bold mb-1">@Math.Round(hourly.TemperatureF)°</div>
+                                    <div class="small text-muted text-nowrap">@hourly.Summary</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Forecast.DailyForecasts != null && Model.Forecast.DailyForecasts.Any())
+                {
+                    <div class="text-start">
+                        <h3 class="h4 fw-bold mb-4 text-gradient">Weekly Forecast</h3>
+                        <div class="row g-3">
+                            @foreach (var daily in Model.Forecast.DailyForecasts)
+                            {
+                                <div class="col-12">
+                                    <div class="forecast-card p-3 rounded-4 shadow-sm bg-white border d-flex align-items-center justify-content-between">
+                                        <div class="fw-bold" style="width: 120px;">@DateTime.Parse(daily.Date).ToString("dddd")</div>
+                                        <div class="text-muted small flex-grow-1">@daily.Summary</div>
+                                        <div class="fw-bold">
+                                            <span class="text-primary">@Math.Round(daily.TemperatureMaxF)°</span>
+                                            <span class="text-muted ms-2 opacity-50">@Math.Round(daily.TemperatureMinF)°</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
             }
             else
             {
@@ -73,6 +112,36 @@
         height: 300px;
         background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
         border-radius: 50%;
+    }
+
+    .forecast-card {
+        min-width: 100px;
+        transition: all 0.2s ease;
+        border: 1px solid rgba(0,0,0,0.05) !important;
+    }
+
+    .forecast-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1) !important;
+        border-color: #3b82f6 !important;
+    }
+
+    .forecast-scroll::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .forecast-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .forecast-scroll::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    .forecast-scroll::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
     }
 
     .rounded-4 {

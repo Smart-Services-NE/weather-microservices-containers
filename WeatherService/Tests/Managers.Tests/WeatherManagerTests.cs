@@ -46,7 +46,9 @@ public class WeatherManagerTests
             72,
             "Clear sky",
             "2025-12-29",
-            new GeoLocation("41.2586", "-96.0025")
+            new GeoLocation("41.2586", "-96.0025"),
+            null,
+            null
         );
 
         _mockCache
@@ -76,7 +78,7 @@ public class WeatherManagerTests
 
         _mockWeatherData
             .Setup(x => x.GetCurrentWeatherAsync("41.2586", "-96.0025"))
-            .ReturnsAsync(new WeatherDataResult(true, 72.5, 0, null));
+            .ReturnsAsync(new WeatherDataResult(true, 72.5, 0, null, null, null));
 
         _mockWeatherCode
             .Setup(x => x.TranslateWeatherCode(0))
@@ -130,7 +132,7 @@ public class WeatherManagerTests
         var error = new ErrorInfo("WEATHER_API_ERROR", "Weather API error");
         _mockWeatherData
             .Setup(x => x.GetCurrentWeatherAsync("41.2586", "-96.0025"))
-            .ReturnsAsync(new WeatherDataResult(false, null, null, error));
+            .ReturnsAsync(new WeatherDataResult(false, null, null, null, null, error));
 
         var result = await _manager.GetWeatherForecastAsync("68136");
 
@@ -180,7 +182,9 @@ public class WeatherManagerTests
             72,
             "Clear sky",
             "2025-12-29",
-            new GeoLocation("41.2586", "-96.0025")
+            new GeoLocation("41.2586", "-96.0025"),
+            null,
+            null
         );
 
         _mockCache

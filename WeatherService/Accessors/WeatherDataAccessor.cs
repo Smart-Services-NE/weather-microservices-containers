@@ -19,7 +19,7 @@ public class WeatherDataAccessor : IWeatherDataAccessor
         try
         {
             var client = _httpClientFactory.CreateClient();
-            var url = $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true&temperature_unit=fahrenheit";
+            var url = $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true&temperature_unit=fahrenheit&hourly=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto";
 
             var response = await client.GetAsync(url);
 
@@ -27,6 +27,8 @@ public class WeatherDataAccessor : IWeatherDataAccessor
             {
                 return new WeatherDataResult(
                     false,
+                    null,
+                    null,
                     null,
                     null,
                     new ErrorInfo("WEATHER_API_ERROR", $"Weather API returned status code: {response.StatusCode}")
@@ -41,14 +43,33 @@ public class WeatherDataAccessor : IWeatherDataAccessor
                     false,
                     null,
                     null,
+                    null,
+                    null,
                     new ErrorInfo("WEATHER_NO_DATA", "No weather data received from API")
                 );
             }
+
+            var hourlyForecasts = weatherData.Hourly?.Time.Select((time, index) => new HourlyForecast(
+                time,
+                weatherData.Hourly.Temperature2m[index],
+                weatherData.Hourly.WeatherCode[index],
+                string.Empty // To be filled by manager
+            )).Take(24);
+
+            var dailyForecasts = weatherData.Daily?.Time.Select((time, index) => new DailyForecast(
+                time,
+                weatherData.Daily.Temperature2mMax[index],
+                weatherData.Daily.Temperature2mMin[index],
+                weatherData.Daily.WeatherCode[index],
+                string.Empty // To be filled by manager
+            ));
 
             return new WeatherDataResult(
                 true,
                 weatherData.CurrentWeather.Temperature,
                 weatherData.CurrentWeather.WeatherCode,
+                hourlyForecasts,
+                dailyForecasts,
                 null
             );
         }
@@ -58,6 +79,8 @@ public class WeatherDataAccessor : IWeatherDataAccessor
                 false,
                 null,
                 null,
+                null,
+                null,
                 new ErrorInfo("WEATHER_NETWORK_ERROR", $"Network error calling weather API: {ex.Message}")
             );
         }
@@ -65,6 +88,8 @@ public class WeatherDataAccessor : IWeatherDataAccessor
         {
             return new WeatherDataResult(
                 false,
+                null,
+                null,
                 null,
                 null,
                 new ErrorInfo("WEATHER_UNEXPECTED_ERROR", $"Unexpected error: {ex.Message}")

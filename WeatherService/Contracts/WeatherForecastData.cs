@@ -7,5 +7,7 @@ public record WeatherForecastData(
     int TemperatureF,
     string Summary,
     string Date,
-    GeoLocation Location
+    GeoLocation Location,
+    IEnumerable<HourlyForecast>? HourlyForecasts = null,
+    IEnumerable<DailyForecast>? DailyForecasts = null
 );

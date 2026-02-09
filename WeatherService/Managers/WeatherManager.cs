@@ -61,6 +61,16 @@ public class WeatherManager : IWeatherManager
 
         var summary = _weatherCode.TranslateWeatherCode(weatherResult.WeatherCode!.Value);
 
+        var hourlyForecasts = weatherResult.HourlyForecasts?.Select(h => h with
+        {
+            Summary = _weatherCode.TranslateWeatherCode(h.WeatherCode)
+        }).ToList();
+
+        var dailyForecasts = weatherResult.DailyForecasts?.Select(d => d with
+        {
+            Summary = _weatherCode.TranslateWeatherCode(d.WeatherCode)
+        }).ToList();
+
         var forecastData = new WeatherForecastData(
             geoResult.City!,
             geoResult.State!,
@@ -68,7 +78,9 @@ public class WeatherManager : IWeatherManager
             (int)weatherResult.TemperatureF!.Value,
             summary,
             DateTime.UtcNow.ToString("yyyy-MM-dd"),
-            new GeoLocation(geoResult.Latitude!, geoResult.Longitude!)
+            new GeoLocation(geoResult.Latitude!, geoResult.Longitude!),
+            hourlyForecasts,
+            dailyForecasts
         );
 
         await _cache.SetAsync(cacheKey, forecastData, TimeSpan.FromMinutes(5));

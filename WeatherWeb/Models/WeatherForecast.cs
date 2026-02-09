@@ -6,4 +6,6 @@ public record WeatherForecast(
     string ZipCode, 
     int TemperatureF, 
     string Summary, 
-    string Date);
+    string Date,
+    IEnumerable<HourlyForecast>? HourlyForecasts = null,
+    IEnumerable<DailyForecast>? DailyForecasts = null);
