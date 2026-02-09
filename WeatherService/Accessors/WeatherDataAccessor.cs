@@ -7,21 +7,20 @@ namespace WeatherService.Accessors;
 
 public class WeatherDataAccessor : IWeatherDataAccessor
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
 
-    public WeatherDataAccessor(IHttpClientFactory httpClientFactory)
+    public WeatherDataAccessor(HttpClient httpClient)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClient = httpClient;
     }
 
     public async Task<WeatherDataResult> GetCurrentWeatherAsync(string latitude, string longitude)
     {
         try
         {
-            var client = _httpClientFactory.CreateClient();
-            var url = $"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true&temperature_unit=fahrenheit&hourly=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto";
+            var url = $"v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true&temperature_unit=fahrenheit&hourly=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto";
 
-            var response = await client.GetAsync(url);
+            var response = await _httpClient.GetAsync(url);
 
             if (!response.IsSuccessStatusCode)
             {

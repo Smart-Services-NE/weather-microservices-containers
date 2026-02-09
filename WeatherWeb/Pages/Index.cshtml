@@ -47,7 +47,7 @@
                                 <div class="forecast-card p-3 rounded-4 shadow-sm text-center bg-white border">
                                     <div class="small fw-bold text-secondary mb-2">@DateTime.Parse(hourly.Time).ToString("h tt")</div>
                                     <div class="fs-4 fw-bold mb-1">@Math.Round(hourly.TemperatureF)°</div>
-                                    <div class="small text-muted text-nowrap">@hourly.Summary</div>
+                                    <div class="small text-muted" title="@hourly.Summary">@hourly.Summary</div>
                                 </div>
                             }
                         </div>
@@ -115,9 +115,17 @@
     }
 
     .forecast-card {
-        min-width: 100px;
         transition: all 0.2s ease;
         border: 1px solid rgba(0,0,0,0.05) !important;
+    }
+
+    .forecast-scroll .forecast-card {
+        width: 140px;
+        flex-shrink: 0;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     .forecast-card:hover {

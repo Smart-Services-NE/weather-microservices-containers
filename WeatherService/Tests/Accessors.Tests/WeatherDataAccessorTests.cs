@@ -15,7 +15,8 @@ public class WeatherDataAccessorTests : IDisposable
     public WeatherDataAccessorTests()
     {
         _mockServer = WireMockServer.Start();
-        _accessor = new WeatherDataAccessor(new TestHttpClientFactory(_mockServer.Url!));
+        var httpClient = new HttpClient { BaseAddress = new Uri(_mockServer.Url!) };
+        _accessor = new WeatherDataAccessor(httpClient);
     }
 
     [Fact]
@@ -84,7 +85,8 @@ public class WeatherDataAccessorTests : IDisposable
     [Fact]
     public async Task GetCurrentWeatherAsync_WithNetworkError_ShouldReturnNetworkError()
     {
-        var invalidAccessor = new WeatherDataAccessor(new TestHttpClientFactory("http://invalid-host-that-does-not-exist:9999"));
+        var httpClient = new HttpClient { BaseAddress = new Uri("http://invalid-host-that-does-not-exist:9999") };
+        var invalidAccessor = new WeatherDataAccessor(httpClient);
 
         var result = await invalidAccessor.GetCurrentWeatherAsync("41.2586", "-96.0025");
 

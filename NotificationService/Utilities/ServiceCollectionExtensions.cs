@@ -10,8 +10,8 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddScoped<ITelemetryUtility, TelemetryUtility>();
-        services.AddScoped<IRetryPolicyUtility, RetryPolicyUtility>();
+        services.AddSingleton<ITelemetryUtility, TelemetryUtility>();
+        services.AddSingleton<IRetryPolicyUtility, RetryPolicyUtility>();
 
         // Register Kafka producer (singleton - reuse producer across requests)
         services.AddSingleton<IKafkaProducerUtility, KafkaProducerUtility>();

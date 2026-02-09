@@ -106,7 +106,7 @@ services:
       kafka:
         condition: service_healthy
       azurite:
-        condition: service_healthy
+        condition: service_started
     ports:
       - "8083:8083"
     environment:
@@ -207,12 +207,13 @@ services:
       - ./notification-data:/app/data
     networks:
       - default
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    # Removed healthcheck because tools are missing from container
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
 
   notification-api-dapr:
     image: "daprio/daprd:latest"
@@ -249,7 +250,7 @@ services:
       - "50003:50003"
     depends_on:
       notification-api:
-        condition: service_healthy
+        condition: service_started
     networks:
       - default
 
@@ -267,12 +268,13 @@ services:
     command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --location /data --debug /data/debug.log
     networks:
       - default
-    healthcheck:
-      test: ["CMD-SHELL", "wget --spider -q http://localhost:10000 || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+    # Removed healthcheck because tools are missing from container
+    # healthcheck:
+    #   test: ["CMD-SHELL", "nc -z localhost 10000 || exit 1"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 10s
 
 volumes:
   azurite-data:

@@ -12,21 +12,11 @@ public class GeoCodingAccessorTests : IDisposable
 {
     private readonly WireMockServer _mockServer;
     private readonly GeoCodingAccessor _accessor;
-    private readonly IHttpClientFactory _httpClientFactory;
-
     public GeoCodingAccessorTests()
     {
         _mockServer = WireMockServer.Start();
-
-        var services = new ServiceCollection();
-        services.AddHttpClient("default", client =>
-        {
-            client.BaseAddress = new Uri(_mockServer.Url!);
-        });
-        var serviceProvider = services.BuildServiceProvider();
-        _httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-
-        _accessor = new GeoCodingAccessor(new TestHttpClientFactory(_mockServer.Url!));
+        var httpClient = new HttpClient { BaseAddress = new Uri(_mockServer.Url!) };
+        _accessor = new GeoCodingAccessor(httpClient);
     }
 
     [Fact]
@@ -111,7 +101,8 @@ public class GeoCodingAccessorTests : IDisposable
     [Fact]
     public async Task GetLocationByZipCodeAsync_WithNetworkError_ShouldReturnNetworkError()
     {
-        var invalidAccessor = new GeoCodingAccessor(new TestHttpClientFactory("http://invalid-host-that-does-not-exist:9999"));
+        var httpClient = new HttpClient { BaseAddress = new Uri("http://invalid-host-that-does-not-exist:9999") };
+        var invalidAccessor = new GeoCodingAccessor(httpClient);
 
         var result = await invalidAccessor.GetLocationByZipCodeAsync("68136");
 

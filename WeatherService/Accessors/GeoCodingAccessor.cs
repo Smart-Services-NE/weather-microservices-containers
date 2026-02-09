@@ -7,19 +7,18 @@ namespace WeatherService.Accessors;
 
 public class GeoCodingAccessor : IGeoCodingAccessor
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
 
-    public GeoCodingAccessor(IHttpClientFactory httpClientFactory)
+    public GeoCodingAccessor(HttpClient httpClient)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClient = httpClient;
     }
 
     public async Task<GeoCodingResult> GetLocationByZipCodeAsync(string zipCode)
     {
         try
         {
-            var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync($"http://api.zippopotam.us/us/{zipCode}");
+            var response = await _httpClient.GetAsync($"us/{zipCode}");
 
             if (!response.IsSuccessStatusCode)
             {
