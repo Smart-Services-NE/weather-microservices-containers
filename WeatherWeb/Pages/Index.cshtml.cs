@@ -23,7 +23,7 @@ public class IndexModel : PageModel
     public async Task OnGetAsync()
     {
         ZipCode ??= "68136";
-        try 
+        try
         {
             Forecast = await _daprClient.InvokeMethodAsync<WeatherForecast>(
                 HttpMethod.Get,

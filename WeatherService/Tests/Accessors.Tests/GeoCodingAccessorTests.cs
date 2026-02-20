@@ -1,9 +1,11 @@
+using Moq;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 using WeatherService.Accessors;
+using WeatherService.Contracts;
 using Xunit;
 
 namespace WeatherService.Accessors.Tests;
@@ -11,12 +13,22 @@ namespace WeatherService.Accessors.Tests;
 public class GeoCodingAccessorTests : IDisposable
 {
     private readonly WireMockServer _mockServer;
+    private readonly Mock<IRetryPolicyUtility> _mockRetry;
+    private readonly Mock<ITelemetryUtility> _mockTelemetry;
     private readonly GeoCodingAccessor _accessor;
     public GeoCodingAccessorTests()
     {
         _mockServer = WireMockServer.Start();
         var httpClient = new HttpClient { BaseAddress = new Uri(_mockServer.Url!) };
-        _accessor = new GeoCodingAccessor(httpClient);
+        _mockRetry = new Mock<IRetryPolicyUtility>();
+        _mockTelemetry = new Mock<ITelemetryUtility>();
+
+        // Setup retry logic to execute immediately
+        _mockRetry
+            .Setup(x => x.ExecuteWithRetryAsync(It.IsAny<Func<CancellationToken, Task<HttpResponseMessage>>>(), It.IsAny<CancellationToken>()))
+            .Returns<Func<CancellationToken, Task<HttpResponseMessage>>, CancellationToken>((op, ct) => op(ct));
+
+        _accessor = new GeoCodingAccessor(httpClient, _mockRetry.Object, _mockTelemetry.Object);
     }
 
     [Fact]
@@ -102,7 +114,7 @@ public class GeoCodingAccessorTests : IDisposable
     public async Task GetLocationByZipCodeAsync_WithNetworkError_ShouldReturnNetworkError()
     {
         var httpClient = new HttpClient { BaseAddress = new Uri("http://invalid-host-that-does-not-exist:9999") };
-        var invalidAccessor = new GeoCodingAccessor(httpClient);
+        var invalidAccessor = new GeoCodingAccessor(httpClient, _mockRetry.Object, _mockTelemetry.Object);
 
         var result = await invalidAccessor.GetLocationByZipCodeAsync("68136");
 

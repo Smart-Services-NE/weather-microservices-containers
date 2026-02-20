@@ -9,6 +9,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<ICacheUtility, CacheUtility>();
         services.AddScoped<ITelemetryUtility, TelemetryUtility>();
+        services.AddSingleton<IRetryPolicyUtility, RetryPolicyUtility>();
         return services;
     }
 }

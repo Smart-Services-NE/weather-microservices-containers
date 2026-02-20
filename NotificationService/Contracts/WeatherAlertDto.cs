@@ -5,7 +5,7 @@ namespace NotificationService.Contracts;
 /// <summary>
 /// Simple C# DTO for weather alert messages from Kafka
 /// </summary>
-public class WeatherAlertDto 
+public class WeatherAlertDto
 {
     [JsonPropertyName("messageId")]
     public string MessageId { get; set; } = string.Empty;

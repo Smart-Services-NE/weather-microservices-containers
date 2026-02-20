@@ -1,8 +1,10 @@
+using Moq;
 using FluentAssertions;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 using WeatherService.Accessors;
+using WeatherService.Contracts;
 using Xunit;
 
 namespace WeatherService.Accessors.Tests;
@@ -10,13 +12,22 @@ namespace WeatherService.Accessors.Tests;
 public class WeatherDataAccessorTests : IDisposable
 {
     private readonly WireMockServer _mockServer;
+    private readonly Mock<IRetryPolicyUtility> _mockRetry;
+    private readonly Mock<ITelemetryUtility> _mockTelemetry;
     private readonly WeatherDataAccessor _accessor;
-
     public WeatherDataAccessorTests()
     {
         _mockServer = WireMockServer.Start();
         var httpClient = new HttpClient { BaseAddress = new Uri(_mockServer.Url!) };
-        _accessor = new WeatherDataAccessor(httpClient);
+        _mockRetry = new Mock<IRetryPolicyUtility>();
+        _mockTelemetry = new Mock<ITelemetryUtility>();
+
+        // Setup retry logic to execute immediately
+        _mockRetry
+            .Setup(x => x.ExecuteWithRetryAsync(It.IsAny<Func<CancellationToken, Task<HttpResponseMessage>>>(), It.IsAny<CancellationToken>()))
+            .Returns<Func<CancellationToken, Task<HttpResponseMessage>>, CancellationToken>((op, ct) => op(ct));
+
+        _accessor = new WeatherDataAccessor(httpClient, _mockRetry.Object, _mockTelemetry.Object);
     }
 
     [Fact]
@@ -86,7 +97,7 @@ public class WeatherDataAccessorTests : IDisposable
     public async Task GetCurrentWeatherAsync_WithNetworkError_ShouldReturnNetworkError()
     {
         var httpClient = new HttpClient { BaseAddress = new Uri("http://invalid-host-that-does-not-exist:9999") };
-        var invalidAccessor = new WeatherDataAccessor(httpClient);
+        var invalidAccessor = new WeatherDataAccessor(httpClient, _mockRetry.Object, _mockTelemetry.Object);
 
         var result = await invalidAccessor.GetCurrentWeatherAsync("41.2586", "-96.0025");
 

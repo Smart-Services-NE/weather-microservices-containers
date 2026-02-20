@@ -8,6 +8,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddWeatherServiceEngines(this IServiceCollection services)
     {
         services.AddScoped<IWeatherCodeEngine, WeatherCodeEngine>();
+        services.AddScoped<IWeatherAlertEngine, WeatherAlertEngine>();
         return services;
     }
 }

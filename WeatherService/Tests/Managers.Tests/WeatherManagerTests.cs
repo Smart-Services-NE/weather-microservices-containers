@@ -12,6 +12,8 @@ public class WeatherManagerTests
     private readonly Mock<IWeatherDataAccessor> _mockWeatherData;
     private readonly Mock<IWeatherCodeEngine> _mockWeatherCode;
     private readonly Mock<ICacheUtility> _mockCache;
+    private readonly Mock<IWeatherAlertEngine> _mockAlertEngine;
+    private readonly Mock<IAlertPublisherAccessor> _mockAlertPublisher;
     private readonly Mock<ITelemetryUtility> _mockTelemetry;
     private readonly WeatherManager _manager;
 
@@ -20,6 +22,8 @@ public class WeatherManagerTests
         _mockGeoCoding = new Mock<IGeoCodingAccessor>();
         _mockWeatherData = new Mock<IWeatherDataAccessor>();
         _mockWeatherCode = new Mock<IWeatherCodeEngine>();
+        _mockAlertEngine = new Mock<IWeatherAlertEngine>();
+        _mockAlertPublisher = new Mock<IAlertPublisherAccessor>();
         _mockCache = new Mock<ICacheUtility>();
         _mockTelemetry = new Mock<ITelemetryUtility>();
 
@@ -31,6 +35,8 @@ public class WeatherManagerTests
             _mockGeoCoding.Object,
             _mockWeatherData.Object,
             _mockWeatherCode.Object,
+            _mockAlertEngine.Object,
+            _mockAlertPublisher.Object,
             _mockCache.Object,
             _mockTelemetry.Object
         );
@@ -210,6 +216,37 @@ public class WeatherManagerTests
 
         result.Should().BeNull();
         _mockTelemetry.Verify(x => x.SetTag("cache.hit", false), Times.Once);
+    }
+
+    [Fact]
+    public async Task NotifyIfFreezingAsync_WhenFreezing_ShouldPublishAlert()
+    {
+        // Arrange
+        var zipCode = "68136";
+        var email = "test@example.com";
+        _mockGeoCoding
+            .Setup(x => x.GetLocationByZipCodeAsync(zipCode))
+            .ReturnsAsync(new GeoCodingResult(true, "Omaha", "NE", "41.2586", "-96.0025", null));
+
+        _mockWeatherData
+            .Setup(x => x.GetCurrentWeatherAsync("41.2586", "-96.0025"))
+            .ReturnsAsync(new WeatherDataResult(true, 30.0, 0, null, null, null)); // 30F is freezing
+
+        _mockAlertEngine
+            .Setup(x => x.IsFreezing(It.IsAny<double>()))
+            .Returns(true);
+
+        _mockAlertPublisher
+            .Setup(x => x.PublishFreezingAlertAsync(email, zipCode, It.IsAny<double>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Result(true));
+
+        // Act
+        var result = await _manager.NotifyIfFreezingAsync(zipCode, email, CancellationToken.None);
+
+        // Assert
+        result.Success.Should().BeTrue();
+        _mockAlertPublisher.Verify(x => x.PublishFreezingAlertAsync(email, zipCode, It.IsAny<double>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mockTelemetry.Verify(x => x.SetTag("alert.sent", true), Times.Once);
     }
 
     private class TestDisposable : IDisposable

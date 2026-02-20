@@ -21,7 +21,7 @@ builder.Services.AddOpenTelemetry()
     {
         metrics.AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation();
-        
+
         metrics.AddPrometheusExporter();
     });
 
