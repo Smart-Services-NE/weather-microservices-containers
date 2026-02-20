@@ -5,6 +5,7 @@ using WeatherService.Contracts;
 using WeatherService.Engines;
 using WeatherService.Accessors;
 using WeatherService.Managers;
+using Microsoft.EntityFrameworkCore;
 using WeatherService.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,15 +33,20 @@ builder.Services.AddOpenTelemetry()
 builder.Services.AddDaprClient();
 builder.Services.AddHybridCache();
 
-builder.Services.AddWeatherServiceManagers();
-builder.Services.AddWeatherServiceEngines();
-builder.Services.AddWeatherServiceUtilities();
+builder.Services.AddWeatherServiceManagers(builder.Configuration);
 builder.Services.AddHealthChecks();
 
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
+// Ensure Database exists
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<WeatherDbContext>();
+    db.Database.EnsureCreated();
+}
 
 app.MapGet("/api/weather/forecast", async (string? zipcode, IWeatherManager manager) =>
 {
@@ -90,6 +96,32 @@ app.MapPost("/api/weather/alerts/freezing", async (string zipcode, string email,
     }
 
     return Results.Ok(new { message = "Freezing alert check completed." });
+});
+
+app.MapPost("/api/weather/subscriptions", async (SubscriptionRequest request, ISubscriptionManager manager, CancellationToken ct) =>
+{
+    var result = await manager.SubscribeAsync(request, ct);
+    if (!result.Success)
+    {
+        return Results.BadRequest(new { error = result.Error });
+    }
+    return Results.Ok(new { message = "Subscribed successfully." });
+});
+
+app.MapPost("/api/weather/subscriptions/process", async (ISubscriptionManager manager, CancellationToken ct) =>
+{
+    var result = await manager.ProcessSubscriptionsAsync(ct);
+    if (!result.Success)
+    {
+        return Results.InternalServerError(new { error = result.Error });
+    }
+    return Results.Ok(new { message = "Batch processing completed." });
+});
+
+app.MapPost("/cron-check", async (ISubscriptionManager manager, CancellationToken ct) =>
+{
+    await manager.ProcessSubscriptionsAsync(ct);
+    return Results.Ok();
 });
 
 app.MapHealthChecks("/health");

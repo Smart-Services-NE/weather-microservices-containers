@@ -1,0 +1,12 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: cron-check
+spec:
+  type: bindings.cron
+  version: v1
+  metadata:
+    - name: schedule
+      value: "@daily" # Runs once a day. For dev, you can use "@every 1m"
+scopes:
+  - weather-api
