@@ -17,6 +17,8 @@ public static class ServiceCollectionExtensions
             client.BaseAddress = new Uri("http://api.zippopotam.us/");
         });
 
+        services.AddScoped<IAlertPublisherAccessor, AlertPublisherAccessor>();
+
         return services;
     }
 }

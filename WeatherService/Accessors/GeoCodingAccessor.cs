@@ -8,17 +8,30 @@ namespace WeatherService.Accessors;
 public class GeoCodingAccessor : IGeoCodingAccessor
 {
     private readonly HttpClient _httpClient;
+    private readonly IRetryPolicyUtility _retry;
+    private readonly ITelemetryUtility _telemetry;
 
-    public GeoCodingAccessor(HttpClient httpClient)
+    public GeoCodingAccessor(
+        HttpClient httpClient,
+        IRetryPolicyUtility retry,
+        ITelemetryUtility telemetry)
     {
         _httpClient = httpClient;
+        _retry = retry;
+        _telemetry = telemetry;
     }
 
     public async Task<GeoCodingResult> GetLocationByZipCodeAsync(string zipCode)
     {
+        using var activity = _telemetry.StartActivity("GetLocationByZipCode");
+        _telemetry.SetTag("zipcode", zipCode);
+
         try
         {
-            var response = await _httpClient.GetAsync($"us/{zipCode}");
+            var response = await _retry.ExecuteWithRetryAsync(async (ct) =>
+            {
+                return await _httpClient.GetAsync($"us/{zipCode}", ct);
+            });
 
             if (!response.IsSuccessStatusCode)
             {

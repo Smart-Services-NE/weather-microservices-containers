@@ -29,12 +29,13 @@ builder.Services.AddOpenTelemetry()
         metrics.AddPrometheusExporter();
     });
 
-builder.Services.AddHttpClient();
+builder.Services.AddDaprClient();
 builder.Services.AddHybridCache();
 
 builder.Services.AddWeatherServiceManagers();
 builder.Services.AddWeatherServiceEngines();
 builder.Services.AddWeatherServiceUtilities();
+builder.Services.AddHealthChecks();
 
 
 var app = builder.Build();
@@ -79,6 +80,19 @@ app.MapGet("/api/weather/cached", async (string zipcode, IWeatherManager manager
     return Results.Ok(result.Data);
 });
 
+app.MapPost("/api/weather/alerts/freezing", async (string zipcode, string email, IWeatherManager manager, CancellationToken ct) =>
+{
+    var result = await manager.NotifyIfFreezingAsync(zipcode, email, ct);
+
+    if (!result.Success)
+    {
+        return Results.BadRequest(new { error = result.Error });
+    }
+
+    return Results.Ok(new { message = "Freezing alert check completed." });
+});
+
+app.MapHealthChecks("/health");
 app.MapPrometheusScrapingEndpoint();
 
 app.Run();

@@ -7,6 +7,8 @@ public class WeatherManager : IWeatherManager
     private readonly IGeoCodingAccessor _geoCoding;
     private readonly IWeatherDataAccessor _weatherData;
     private readonly IWeatherCodeEngine _weatherCode;
+    private readonly IWeatherAlertEngine _alertEngine;
+    private readonly IAlertPublisherAccessor _alertPublisher;
     private readonly ICacheUtility _cache;
     private readonly ITelemetryUtility _telemetry;
 
@@ -14,12 +16,16 @@ public class WeatherManager : IWeatherManager
         IGeoCodingAccessor geoCoding,
         IWeatherDataAccessor weatherData,
         IWeatherCodeEngine weatherCode,
+        IWeatherAlertEngine alertEngine,
+        IAlertPublisherAccessor alertPublisher,
         ICacheUtility cache,
         ITelemetryUtility telemetry)
     {
         _geoCoding = geoCoding;
         _weatherData = weatherData;
         _weatherCode = weatherCode;
+        _alertEngine = alertEngine;
+        _alertPublisher = alertPublisher;
         _cache = cache;
         _telemetry = telemetry;
     }
@@ -128,5 +134,37 @@ public class WeatherManager : IWeatherManager
 
         _telemetry.SetTag("cache.hit", true);
         return new WeatherForecastResult(true, cached, null);
+    }
+
+    public async Task<Result> NotifyIfFreezingAsync(string zipCode, string email, CancellationToken ct)
+    {
+        using var activity = _telemetry.StartActivity("NotifyIfFreezing");
+        _telemetry.SetTag("alert.zipcode", zipCode);
+        _telemetry.SetTag("alert.email", email);
+
+        // 1. Get coordinates
+        var geoResult = await _geoCoding.GetLocationByZipCodeAsync(zipCode);
+        if (!geoResult.Success)
+            return new Result(false, Error: geoResult.Error);
+
+        // 2. Get current weather
+        var weatherResult = await _weatherData.GetCurrentWeatherAsync(
+            geoResult.Latitude!, geoResult.Longitude!);
+
+        if (!weatherResult.Success)
+            return new Result(false, Error: weatherResult.Error);
+
+        // 3. Check if freezing (using Engine)
+        var temperatureC = (weatherResult.TemperatureF! - 32) * 5 / 9;
+        if (_alertEngine.IsFreezing(temperatureC.Value))
+        {
+            _telemetry.SetTag("alert.sent", true);
+            // 4. Publish Alert
+            return await _alertPublisher.PublishFreezingAlertAsync(
+                email, zipCode, temperatureC.Value, ct);
+        }
+
+        _telemetry.SetTag("alert.sent", false);
+        return new Result(true);
     }
 }

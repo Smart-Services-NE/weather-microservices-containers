@@ -8,19 +8,33 @@ namespace WeatherService.Accessors;
 public class WeatherDataAccessor : IWeatherDataAccessor
 {
     private readonly HttpClient _httpClient;
+    private readonly IRetryPolicyUtility _retry;
+    private readonly ITelemetryUtility _telemetry;
 
-    public WeatherDataAccessor(HttpClient httpClient)
+    public WeatherDataAccessor(
+        HttpClient httpClient,
+        IRetryPolicyUtility retry,
+        ITelemetryUtility telemetry)
     {
         _httpClient = httpClient;
+        _retry = retry;
+        _telemetry = telemetry;
     }
 
     public async Task<WeatherDataResult> GetCurrentWeatherAsync(string latitude, string longitude)
     {
+        using var activity = _telemetry.StartActivity("GetCurrentWeather");
+        _telemetry.SetTag("latitude", latitude);
+        _telemetry.SetTag("longitude", longitude);
+
         try
         {
             var url = $"v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true&temperature_unit=fahrenheit&hourly=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto";
 
-            var response = await _httpClient.GetAsync(url);
+            var response = await _retry.ExecuteWithRetryAsync(async (ct) =>
+            {
+                return await _httpClient.GetAsync(url, ct);
+            });
 
             if (!response.IsSuccessStatusCode)
             {
