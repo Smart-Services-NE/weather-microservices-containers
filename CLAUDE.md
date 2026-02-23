@@ -33,8 +33,26 @@ docs/
 - **Current** - Keep updated with code changes
 
 When creating or updating documentation, always follow the patterns in [Documentation Guidelines](docs/DOCUMENTATION_GUIDELINES.md).
+## AI Agents & Workflows
 
-## Architecture Principles
+To maintain the high standards of this project, several specialized AI agents are available as workflows in `.agents/workflows/`.
+
+### 🚀 Primary Workflow
+- **/feature-orchestrator**: **The master agent.** Use this for any new user story. It orchestrates all other agents below in the correct sequence to ensure a safe and complete implementation.
+
+### Specialized Agents:
+- **/feature-design**: Maps User Stories to IDesign layers and Avro schemas.
+- **/devops-infra**: Manages Podman containers, Dapr sidecars, and port assignments.
+- **/messaging-schema**: Manages Kafka topics, Avro schemas, and messaging logic.
+- **/implementation-tdd**: Implements components using TDD and Dependency Injection.
+- **/obs-resilience**: Adds tracing and Polly resilience to services.
+- **/arch-compliance**: Enforces strict IDesign layer rules and dependency constraints.
+- **/obs-specialist**: Ensures comprehensive observability (OTel, Prometheus, Grafana).
+- **/security-guardian**: Protects secrets and manages security configurations.
+- **/docs-custodian**: Keeps `CLAUDE.md` and the `docs/` folder in sync with code changes.
+- **/create-pr**: Finalizes work and prepares the Pull Request.
+
+Use these agents by name (e.g., "Run /feature-orchestrator") to start their respective workflows.
 
 ### IDesign Layered Architecture
 
