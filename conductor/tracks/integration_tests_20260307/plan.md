@@ -2,20 +2,20 @@
 
 This plan outlines the steps to create a comprehensive integration testing suite for the ContainerApp microservices, following the project's TDD-inspired workflow and iDesign principles.
 
-## Phase 1: Test Project Setup and Infrastructure Connection
+## Phase 1: Test Project Setup and Infrastructure Connection [checkpoint: e758b73]
 This phase focuses on creating the new integration test project and verifying it can communicate with the existing Podman-hosted resources (Kafka, Dapr, SQLite).
 
-- [ ] Task: Create `IntegrationTests` project and add necessary dependencies (xUnit, FluentAssertions, Confluent.Kafka, Dapr.Client, EF Core for verification).
-- [ ] Task: Configure test settings to target the `podman compose` environment (e.g., Kafka bootstrap servers, Dapr sidecar ports).
-- [ ] Task: Implement a simple "Infrastructure Ping" test to verify connectivity to Kafka and the Notification SQLite database.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Test Project Setup and Infrastructure Connection' (Protocol in workflow.md)
+- [x] Task: Create `IntegrationTests` project and add necessary dependencies (xUnit, FluentAssertions, Confluent.Kafka, Dapr.Client, EF Core for verification). 7a7c8b4
+- [x] Task: Configure test settings to target the `podman compose` environment (e.g., Kafka bootstrap servers, Dapr sidecar ports). 687475f
+- [x] Task: Implement a simple "Infrastructure Ping" test to verify connectivity to Kafka and the Notification SQLite database. ba22312
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Test Project Setup and Infrastructure Connection' (Protocol in workflow.md) e758b73
 
 ## Phase 2: End-to-End Flow (Freezing Alert Scenario)
 In this phase, we implement the primary end-to-end test case for the Freezing Alert flow.
 
-- [ ] Task: Write failing integration test that triggers a `FreezingAlertRequest` in `WeatherService` and asserts that a corresponding notification eventually appears in the `NotificationService` database.
-- [ ] Task: Implement the test logic, including triggering the request via `WeatherService`'s API (using Dapr or direct HTTP) and polling the `NotificationService` database for the result.
-- [ ] Task: Verify the test passes and that the Avro-serialized data is correctly processed throughout the pipeline.
+- [x] Task: Write failing integration test that triggers a `FreezingAlertRequest` in `WeatherService` and asserts that a corresponding notification eventually appears in the `NotificationService` database. d5239a0
+- [x] Task: Implement the test logic, including triggering the request via `WeatherService`'s API (using Dapr or direct HTTP) and polling the `NotificationService` database for the result. d19f91d
+- [x] Task: Verify the test passes and that the Avro-serialized data is correctly processed throughout the pipeline. ed427db
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: End-to-End Flow (Freezing Alert Scenario)' (Protocol in workflow.md)
 
 ## Phase 3: Additional Scenarios and Observability Verification
