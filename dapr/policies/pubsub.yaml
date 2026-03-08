@@ -7,10 +7,16 @@ spec:
   version: v1
   metadata:
   - name: brokers
-    value: "kafka:9093"
+    value: "pkc-n3603.us-central1.gcp.confluent.cloud:9092"
   - name: consumerID
     value: "containerapp-consumer"
   - name: authType
-    value: "none"
+    value: "sasl"
+  - name: saslMechanism
+    value: "plain"
+  - name: saslUsername
+    value: "Z4TZDPXR7YTJMISG"
+  - name: saslPassword
+    value: "cfltjS3Ghv/g5kkBgZD0YkkeCjmI0uB0OtODdP1KqkAS5XeqG5UJNmtf2aVmCjQA"
   - name: rawPayload
     value: "true"

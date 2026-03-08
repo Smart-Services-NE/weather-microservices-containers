@@ -200,15 +200,15 @@ services:
       - DAPR_HTTP_ENDPOINT=http://notification-api-dapr:3502
       # Kafka Configuration (Confluent Cloud)
       - Kafka__BootstrapServers=pkc-n3603.us-central1.gcp.confluent.cloud:9092
-      - Kafka__GroupId=notification-service
+      - Kafka__GroupId=containerapp-group-1
       - Kafka__SecurityProtocol=SaslSsl
       - Kafka__SaslMechanism=Plain
-      - Kafka__SaslUsername=4Z6OXHUL3JNA33WX
-      - Kafka__SaslPassword=cflt3xkPbgMSvkDaCTsRPwuEci6tYPulTiJsZrInd+7aPhrtxdEL31IxrwcLHuqQ
+      - Kafka__SaslUsername=Z4TZDPXR7YTJMISG
+      - Kafka__SaslPassword=cfltjS3Ghv/g5kkBgZD0YkkeCjmI0uB0OtODdP1KqkAS5XeqG5UJNmtf2aVmCjQA
       # Schema Registry Configuration (Required for Avro deserialization)
-      - Kafka__SchemaRegistryUrl=https://psrc-knmwm.us-east-2.aws.confluent.cloud
-      - Kafka__SchemaRegistryKey=DP4DBAWO25S7YPAP
-      - Kafka__SchemaRegistrySecret=cfltSug1YD8Wcn5FBbrtrSEfey6i41E8xXzdNBvkvsxlJqfBRqhNzVUkc6zcPfvg
+      - Kafka__SchemaRegistryUrl=https://psrc-30dr2.us-central1.gcp.confluent.cloud
+      - Kafka__SchemaRegistryKey=2U2OQLT5KRMLAHDO
+      - Kafka__SchemaRegistrySecret=cfltrC1wWcIMvSV2FeEIBouudPLbEI7waXxyj/7M7HeYMYpfRjR8F7g9ClFmYHDg
       - Kafka__UseAvroConsumer=true
       # Email Configuration
       - Email__SmtpHost=smtp.gmail.com
