@@ -12,6 +12,15 @@ services:
       - DAPR_HTTP_PORT=3501
       - DAPR_GRPC_ENDPOINT=http://weather-api-dapr:50001
       - DAPR_HTTP_ENDPOINT=http://weather-api-dapr:3501
+      - Kafka__UseAvro=true
+      - Kafka__BootstrapServers=pkc-n3603.us-central1.gcp.confluent.cloud:9092
+      - Kafka__SecurityProtocol=SaslSsl
+      - Kafka__SaslMechanism=Plain
+      - Kafka__SaslUsername=4Z6OXHUL3JNA33WX
+      - Kafka__SaslPassword=cflt3xkPbgMSvkDaCTsRPwuEci6tYPulTiJsZrInd+7aPhrtxdEL31IxrwcLHuqQ
+      - Kafka__SchemaRegistryUrl=https://psrc-knmwm.us-east-2.aws.confluent.cloud
+      - Kafka__SchemaRegistryKey=DP4DBAWO25S7YPAP
+      - Kafka__SchemaRegistrySecret=cfltSug1YD8Wcn5FBbrtrSEfey6i41E8xXzdNBvkvsxlJqfBRqhNzVUkc6zcPfvg
 
   weather-api-dapr:
     image: "daprio/daprd:latest"
@@ -190,17 +199,17 @@ services:
       - DAPR_GRPC_ENDPOINT=http://notification-api-dapr:50003
       - DAPR_HTTP_ENDPOINT=http://notification-api-dapr:3502
       # Kafka Configuration (Confluent Cloud)
-      - Kafka__BootstrapServers=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9093}
-      - Kafka__GroupId=${KAFKA_GROUP_ID:-notification-service}
-      - Kafka__SecurityProtocol=Plaintext
+      - Kafka__BootstrapServers=pkc-n3603.us-central1.gcp.confluent.cloud:9092
+      - Kafka__GroupId=notification-service
+      - Kafka__SecurityProtocol=SaslSsl
       - Kafka__SaslMechanism=Plain
-      - Kafka__SaslUsername=
-      - Kafka__SaslPassword=
+      - Kafka__SaslUsername=4Z6OXHUL3JNA33WX
+      - Kafka__SaslPassword=cflt3xkPbgMSvkDaCTsRPwuEci6tYPulTiJsZrInd+7aPhrtxdEL31IxrwcLHuqQ
       # Schema Registry Configuration (Required for Avro deserialization)
-      - Kafka__SchemaRegistryUrl=
-      - Kafka__SchemaRegistryKey=
-      - Kafka__SchemaRegistrySecret=
-      - Kafka__UseAvroConsumer=false
+      - Kafka__SchemaRegistryUrl=https://psrc-knmwm.us-east-2.aws.confluent.cloud
+      - Kafka__SchemaRegistryKey=DP4DBAWO25S7YPAP
+      - Kafka__SchemaRegistrySecret=cfltSug1YD8Wcn5FBbrtrSEfey6i41E8xXzdNBvkvsxlJqfBRqhNzVUkc6zcPfvg
+      - Kafka__UseAvroConsumer=true
       # Email Configuration
       - Email__SmtpHost=smtp.gmail.com
       - Email__SmtpPort=587

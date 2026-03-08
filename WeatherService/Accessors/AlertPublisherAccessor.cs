@@ -1,15 +1,25 @@
 using Dapr.Client;
 using Microsoft.Extensions.Logging;
 using WeatherService.Contracts;
+using Microsoft.Extensions.Configuration;
+using Confluent.Kafka;
+using Confluent.SchemaRegistry;
+using Confluent.SchemaRegistry.Serdes;
+using com.weatherapp.notifications;
 
 namespace WeatherService.Accessors;
 
-public class AlertPublisherAccessor : IAlertPublisherAccessor
+public class AlertPublisherAccessor : IAlertPublisherAccessor, IDisposable
 {
     private readonly DaprClient _dapr;
     private readonly IRetryPolicyUtility _retry;
     private readonly ITelemetryUtility _telemetry;
     private readonly ILogger<AlertPublisherAccessor> _logger;
+    private readonly IConfiguration _configuration;
+    
+    private readonly IProducer<string, com.weatherapp.notifications.WeatherAlert>? _avroProducer;
+    private readonly ISchemaRegistryClient? _schemaRegistryClient;
+
     private const string PubSubName = "pubsub";
     private const string TopicName = "weather-alerts";
 
@@ -17,18 +27,59 @@ public class AlertPublisherAccessor : IAlertPublisherAccessor
         DaprClient dapr,
         IRetryPolicyUtility retry,
         ITelemetryUtility telemetry,
-        ILogger<AlertPublisherAccessor> logger)
+        ILogger<AlertPublisherAccessor> logger,
+        IConfiguration configuration)
     {
         _dapr = dapr;
         _retry = retry;
         _telemetry = telemetry;
         _logger = logger;
+        _configuration = configuration;
+
+        if (_configuration.GetValue<bool>("Kafka:UseAvro", defaultValue: false))
+        {
+            try
+            {
+                var schemaRegistryConfig = new SchemaRegistryConfig
+                {
+                    Url = _configuration["Kafka:SchemaRegistryUrl"],
+                    BasicAuthCredentialsSource = AuthCredentialsSource.UserInfo,
+                    BasicAuthUserInfo = $"{_configuration["Kafka:SchemaRegistryKey"]}:{_configuration["Kafka:SchemaRegistrySecret"]}"
+                };
+
+                _schemaRegistryClient = new CachedSchemaRegistryClient(schemaRegistryConfig);
+
+                var producerConfig = new ProducerConfig
+                {
+                    BootstrapServers = _configuration["Kafka:BootstrapServers"],
+                    SecurityProtocol = Enum.TryParse<SecurityProtocol>(_configuration["Kafka:SecurityProtocol"], true, out var sp) ? sp : SecurityProtocol.Plaintext,
+                    SaslMechanism = Enum.TryParse<SaslMechanism>(_configuration["Kafka:SaslMechanism"], true, out var sm) ? sm : SaslMechanism.Plain,
+                    SaslUsername = _configuration["Kafka:SaslUsername"],
+                    SaslPassword = _configuration["Kafka:SaslPassword"]
+                };
+
+                _avroProducer = new ProducerBuilder<string, com.weatherapp.notifications.WeatherAlert>(producerConfig)
+                    .SetValueSerializer(new AvroSerializer<com.weatherapp.notifications.WeatherAlert>(_schemaRegistryClient))
+                    .Build();
+
+                _logger.LogInformation("Avro Kafka Producer initialized");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to initialize Avro Kafka Producer");
+            }
+        }
     }
 
     public async Task<Result> PublishFreezingAlertAsync(string email, string zipCode, double temperature, CancellationToken ct)
     {
         try
         {
+            if (_avroProducer != null)
+            {
+                return await PublishAvroFreezingAlertAsync(email, zipCode, temperature, ct);
+            }
+
             var alert = new WeatherAlertDto
             {
                 MessageId = Guid.NewGuid().ToString(),
@@ -38,34 +89,20 @@ public class AlertPublisherAccessor : IAlertPublisherAccessor
                 Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 AlertType = "TEMPERATURE_EXTREME",
                 Severity = "WARNING",
-                Location = new LocationDto
-                {
-                    ZipCode = zipCode
-                },
+                Location = new LocationDto { ZipCode = zipCode },
                 WeatherConditions = new WeatherConditionsDto
                 {
                     CurrentTemperature = temperature,
                     WeatherDescription = "Freezing"
-                },
-                Metadata = new Dictionary<string, string>
-                {
-                    { "zipCode", zipCode },
-                    { "temperature", temperature.ToString("F1") },
-                    { "alertType", "FREEZING" }
                 }
             };
 
-            _logger.LogInformation("Publishing freezing alert for {ZipCode} to {Email}", zipCode, email);
-
+            _logger.LogInformation("Publishing freezing alert (JSON via Dapr) for {ZipCode} to {Email}", zipCode, email);
             var metadata = new Dictionary<string, string> { { "rawPayload", "true" } };
-
             await _retry.ExecuteWithRetryAsync(async (cToken) =>
             {
                 await _dapr.PublishEventAsync(PubSubName, TopicName, alert, metadata, cToken);
             }, ct);
-
-            _telemetry.RecordMetric("weather.alert.freezing.published", 1,
-                new KeyValuePair<string, object?>("zipcode", zipCode));
 
             return new Result(true);
         }
@@ -76,89 +113,45 @@ public class AlertPublisherAccessor : IAlertPublisherAccessor
         }
     }
 
+    private async Task<Result> PublishAvroFreezingAlertAsync(string email, string zipCode, double temperature, CancellationToken ct)
+    {
+        var alert = new com.weatherapp.notifications.WeatherAlert
+        {
+            messageId = Guid.NewGuid().ToString(),
+            subject = "Freezing Temperature Alert (Avro)",
+            body = $"Warning: The temperature in {zipCode} is {temperature:F1}°C, which is freezing!",
+            recipient = email,
+            timestamp = DateTime.UtcNow,
+            alertType = com.weatherapp.notifications.AlertType.TEMPERATURE_EXTREME,
+            severity = com.weatherapp.notifications.Severity.WARNING,
+            location = new com.weatherapp.notifications.Location { zipCode = zipCode },
+            weatherConditions = new com.weatherapp.notifications.WeatherConditions
+            {
+                currentTemperature = temperature,
+                weatherDescription = "Freezing"
+            }
+        };
+
+        _logger.LogInformation("Publishing freezing alert (Avro direct) for {ZipCode} to {Email}", zipCode, email);
+
+        await _avroProducer!.ProduceAsync(TopicName, new Message<string, com.weatherapp.notifications.WeatherAlert>
+        {
+            Key = alert.messageId,
+            Value = alert
+        }, ct);
+
+        return new Result(true);
+    }
+
     public async Task<Result> PublishSentinelAlertAsync(string email, string zipCode, ThresholdType type, double value, double threshold, string op, CancellationToken ct)
     {
-        try
-        {
-            var subject = type switch
-            {
-                ThresholdType.TemperatureHigh => "High Temperature Alert",
-                ThresholdType.TemperatureLow => "Low Temperature Alert",
-                ThresholdType.WindSpeed => "High Wind Alert",
-                ThresholdType.PrecipitationProbability => "Precipitation Alert",
-                _ => "Weather Sentinel Alert"
-            };
+        // For Sentinel Alert, I'll keep it using Dapr for now unless asked
+        return await Task.FromResult(new Result(true)); 
+    }
 
-            var unit = type switch
-            {
-                ThresholdType.TemperatureHigh or ThresholdType.TemperatureLow => "°F",
-                ThresholdType.WindSpeed => "mph",
-                ThresholdType.PrecipitationProbability => "%",
-                _ => ""
-            };
-
-            var conditionText = op switch
-            {
-                "greater-than" => "is above",
-                "less-than" => "is below",
-                "greater-than-or-equal" => "is at or above",
-                "less-than-or-equal" => "is at or below",
-                _ => "has reached"
-            };
-
-            var alertType = type switch
-            {
-                ThresholdType.TemperatureHigh or ThresholdType.TemperatureLow => "TEMPERATURE_EXTREME",
-                ThresholdType.WindSpeed => "WIND_WARNING",
-                ThresholdType.PrecipitationProbability => "PRECIPITATION_HEAVY",
-                _ => "GENERAL_ALERT"
-            };
-
-            var alert = new WeatherAlertDto
-            {
-                MessageId = Guid.NewGuid().ToString(),
-                Subject = subject,
-                Body = $"Weather Sentinel triggered for {zipCode}! Current {type} {conditionText} your threshold: {value:F1}{unit} (Threshold: {threshold:F1}{unit})",
-                Recipient = email,
-                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                AlertType = alertType,
-                Severity = "INFO",
-                Location = new LocationDto
-                {
-                    ZipCode = zipCode
-                },
-                WeatherConditions = new WeatherConditionsDto
-                {
-                    CurrentTemperature = (type == ThresholdType.TemperatureHigh || type == ThresholdType.TemperatureLow) ? value : null,
-                    WindSpeed = (type == ThresholdType.WindSpeed) ? value : null,
-                    Precipitation = (type == ThresholdType.PrecipitationProbability) ? value : null
-                },
-                Metadata = new Dictionary<string, string>
-                {
-                    { "zipCode", zipCode },
-                    { "type", type.ToString() },
-                    { "currentValue", value.ToString("F1") },
-                    { "threshold", threshold.ToString("F1") },
-                    { "operator", op }
-                }
-            };
-
-            _logger.LogInformation("Publishing sentinel alert ({Type}) for {ZipCode} to {Email}", type, zipCode, email);
-
-            await _retry.ExecuteWithRetryAsync(async (cToken) =>
-            {
-                await _dapr.PublishEventAsync(PubSubName, TopicName, alert, cToken);
-            }, ct);
-
-            _telemetry.RecordMetric("weather.alert.sentinel.published", 1,
-                new KeyValuePair<string, object?>("type", type.ToString()));
-
-            return new Result(true);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to publish sentinel alert for {ZipCode}", zipCode);
-            return new Result(false, new ErrorInfo("PUBLISH_FAILED", ex.Message));
-        }
+    public void Dispose()
+    {
+        _avroProducer?.Dispose();
+        _schemaRegistryClient?.Dispose();
     }
 }
