@@ -30,8 +30,7 @@ public class SubscriptionTests
         var optionsBuilder = new DbContextOptionsBuilder<NotificationDbContext>();
         optionsBuilder.UseSqlite($"Data Source={_notificationDbPath}");
         using var context = new NotificationDbContext(optionsBuilder.Options);
-        context.Notifications.RemoveRange(context.Notifications);
-        context.SaveChanges();
+        context.Database.ExecuteSqlRaw("DELETE FROM Notifications");
     }
 
     /// <summary>

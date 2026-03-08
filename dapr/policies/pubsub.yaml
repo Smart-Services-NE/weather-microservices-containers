@@ -9,7 +9,7 @@ spec:
   - name: brokers
     value: "pkc-n3603.us-central1.gcp.confluent.cloud:9092"
   - name: consumerID
-    value: "containerapp-consumer"
+    value: "containerapp-consumer-final"
   - name: authType
     value: "sasl"
   - name: saslMechanism
