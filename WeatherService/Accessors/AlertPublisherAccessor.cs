@@ -29,14 +29,25 @@ public class AlertPublisherAccessor : IAlertPublisherAccessor
     {
         try
         {
-            var alert = new
+            var alert = new WeatherAlertDto
             {
-                messageId = Guid.NewGuid().ToString(),
-                subject = "Freezing Temperature Alert",
-                body = $"Warning: The temperature in {zipCode} is {temperature:F1}°C, which is freezing!",
-                recipient = email,
-                timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                metadata = new Dictionary<string, string>
+                MessageId = Guid.NewGuid().ToString(),
+                Subject = "Freezing Temperature Alert",
+                Body = $"Warning: The temperature in {zipCode} is {temperature:F1}°C, which is freezing!",
+                Recipient = email,
+                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                AlertType = "TEMPERATURE_EXTREME",
+                Severity = "WARNING",
+                Location = new LocationDto
+                {
+                    ZipCode = zipCode
+                },
+                WeatherConditions = new WeatherConditionsDto
+                {
+                    CurrentTemperature = temperature,
+                    WeatherDescription = "Freezing"
+                },
+                Metadata = new Dictionary<string, string>
                 {
                     { "zipCode", zipCode },
                     { "temperature", temperature.ToString("F1") },
@@ -93,14 +104,34 @@ public class AlertPublisherAccessor : IAlertPublisherAccessor
                 _ => "has reached"
             };
 
-            var alert = new
+            var alertType = type switch
             {
-                messageId = Guid.NewGuid().ToString(),
-                subject = subject,
-                body = $"Weather Sentinel triggered for {zipCode}! Current {type} {conditionText} your threshold: {value:F1}{unit} (Threshold: {threshold:F1}{unit})",
-                recipient = email,
-                timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                metadata = new Dictionary<string, string>
+                ThresholdType.TemperatureHigh or ThresholdType.TemperatureLow => "TEMPERATURE_EXTREME",
+                ThresholdType.WindSpeed => "WIND_WARNING",
+                ThresholdType.PrecipitationProbability => "PRECIPITATION_HEAVY",
+                _ => "GENERAL_ALERT"
+            };
+
+            var alert = new WeatherAlertDto
+            {
+                MessageId = Guid.NewGuid().ToString(),
+                Subject = subject,
+                Body = $"Weather Sentinel triggered for {zipCode}! Current {type} {conditionText} your threshold: {value:F1}{unit} (Threshold: {threshold:F1}{unit})",
+                Recipient = email,
+                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                AlertType = alertType,
+                Severity = "INFO",
+                Location = new LocationDto
+                {
+                    ZipCode = zipCode
+                },
+                WeatherConditions = new WeatherConditionsDto
+                {
+                    CurrentTemperature = (type == ThresholdType.TemperatureHigh || type == ThresholdType.TemperatureLow) ? value : null,
+                    WindSpeed = (type == ThresholdType.WindSpeed) ? value : null,
+                    Precipitation = (type == ThresholdType.PrecipitationProbability) ? value : null
+                },
+                Metadata = new Dictionary<string, string>
                 {
                     { "zipCode", zipCode },
                     { "type", type.ToString() },
