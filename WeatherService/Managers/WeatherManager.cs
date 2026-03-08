@@ -136,9 +136,9 @@ public class WeatherManager : IWeatherManager
         return new WeatherForecastResult(true, cached, null);
     }
 
-    public async Task<Result> NotifyIfFreezingAsync(string zipCode, string email, CancellationToken ct)
+    public async Task<Result> CheckAndNotifyFreezingAsync(string zipCode, string email, CancellationToken ct)
     {
-        using var activity = _telemetry.StartActivity("NotifyIfFreezing");
+        using var activity = _telemetry.StartActivity("CheckAndNotifyFreezing");
         _telemetry.SetTag("alert.zipcode", zipCode);
         _telemetry.SetTag("alert.email", email);
 

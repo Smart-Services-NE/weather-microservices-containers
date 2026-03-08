@@ -64,7 +64,7 @@ public class SubscriptionManager : ISubscriptionManager
             {
                 // 1. Get current weather for this zip code
                 var weatherResult = await _weatherManager.GetWeatherForecastAsync(sub.ZipCode);
-                if (!weatherResult.Success || weatherResult.Forecast == null)
+                if (!weatherResult.Success || weatherResult.Data == null)
                 {
                     _logger.LogWarning("Could not fetch weather for sentinel {Email} at {ZipCode}", sub.Email, sub.ZipCode);
                     failCount++;
@@ -74,9 +74,9 @@ public class SubscriptionManager : ISubscriptionManager
                 // 2. Identify the value to check based on ThresholdType
                 double currentValue = sub.Type switch
                 {
-                    ThresholdType.TemperatureHigh or ThresholdType.TemperatureLow => weatherResult.Forecast.TemperatureF,
-                    ThresholdType.WindSpeed => (weatherResult.Forecast.HourlyForecasts?.FirstOrDefault()?.WindSpeed ?? 0) * 0.621371, // km/h to mph approx
-                    ThresholdType.PrecipitationProbability => weatherResult.Forecast.DailyForecasts?.FirstOrDefault()?.PrecipitationProbability ?? 0,
+                    ThresholdType.TemperatureHigh or ThresholdType.TemperatureLow => weatherResult.Data.TemperatureF,
+                    ThresholdType.WindSpeed => (weatherResult.Data.HourlyForecasts?.FirstOrDefault()?.WindSpeed ?? 0) * 0.621371, // km/h to mph approx
+                    ThresholdType.PrecipitationProbability => weatherResult.Data.DailyForecasts?.FirstOrDefault()?.PrecipitationProbability ?? 0,
                     _ => 0
                 };
 
