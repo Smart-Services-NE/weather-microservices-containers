@@ -1,64 +1,24 @@
-graph TD
-    %% User and External Clients
-    User([User]) -->|HTTP/Browser| WeatherWeb[WeatherWeb (Frontend)]
-
-    %% Services
-    subgraph "ContainerApp Services"
-        WeatherWeb -->|Dapr Invocation / HTTP| WeatherService[WeatherService (API)]
-        
-        subgraph "Notification System"
-            NotificationService[NotificationService (Worker)]
-            SQLite[(SQLite DB)]
-            Azurite[(Azurite Storage)]
-            NotificationService --> SQLite
-            NotificationService --> Azurite
-        end
-    end
-
-    %% Infrastructure & Middleware
-    subgraph "Dapr & Middleware"
-        DaprCron[Dapr Cron Binding] -->|Trigger @daily| WeatherService
-        Kafka{{Apache Kafka (Pub/Sub)}}
-        
-        WeatherService -- Publish --> Kafka
-        Kafka -- Subscribe --> NotificationService
-    end
-
-    %% External Dependencies
-    subgraph "External APIs"
-        OpenMeteo[Open-Meteo API]
-        Zippopotam[Zippopotam API]
-        SMTP[SMTP Server (Gmail)]
-    end
-
-    WeatherService -->|Get Weather| OpenMeteo
-    WeatherService -->|Geocoding| Zippopotam
-    NotificationService -->|Send Email| SMTP
-
-    %% Observability
-    subgraph "Observability Stack"
-        Zipkin[Zipkin (Tracing)]
-        Prometheus[Prometheus (Metrics)]
-        Grafana[Grafana (Dashboards)]
-        
-        WeatherWeb -.->|Trace| Zipkin
-        WeatherService -.->|Trace| Zipkin
-        NotificationService -.->|Trace| Zipkin
-        
-        WeatherWeb -.->|Metrics| Prometheus
-        WeatherService -.->|Metrics| Prometheus
-        NotificationService -.->|Metrics| Prometheus
-        
-        Prometheus --> Grafana
-    end
-
-    %% Styling
-    classDef service fill:#f9f,stroke:#333,stroke-width:2px;
-    classDef infra fill:#dfd,stroke:#333,stroke-width:2px;
-    classDef external fill:#ddf,stroke:#333,stroke-width:2px;
-    classDef db fill:#ffd,stroke:#333,stroke-width:2px;
+flowchart TD
+    User(User) --> WeatherWeb[WeatherWeb Frontend]
+    WeatherWeb --> WeatherService[WeatherService API]
     
-    class WeatherWeb,WeatherService,NotificationService service;
-    class Kafka,DaprCron infra;
-    class OpenMeteo,Zippopotam,SMTP external;
-    class SQLite,Azurite db;
+    DaprCron[Dapr Cron Binding] --> WeatherService
+    WeatherService --> Kafka[Apache Kafka PubSub]
+    Kafka --> NotificationService[NotificationService Worker]
+    
+    NotificationService --> SQLite[(SQLite DB)]
+    NotificationService --> Azurite[(Azurite Storage)]
+    
+    WeatherService --> OpenMeteo[Open-Meteo API]
+    WeatherService --> Zippopotam[Zippopotam API]
+    NotificationService --> SMTP[SMTP Server]
+    
+    WeatherWeb --> Zipkin[Zipkin Tracing]
+    WeatherService --> Zipkin
+    NotificationService --> Zipkin
+    
+    WeatherWeb --> Prometheus[Prometheus Metrics]
+    WeatherService --> Prometheus
+    NotificationService --> Prometheus
+    
+    Prometheus --> Grafana[Grafana Dashboards]
