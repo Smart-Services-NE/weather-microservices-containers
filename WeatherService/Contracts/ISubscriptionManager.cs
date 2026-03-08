@@ -1,8 +1,30 @@
 namespace WeatherService.Contracts;
 
-public record SubscriptionRequest(string Email, string ZipCode);
+public enum ThresholdType
+{
+    TemperatureHigh,
+    TemperatureLow,
+    WindSpeed,
+    PrecipitationProbability
+}
 
-public record SubscriptionRecord(Guid Id, string Email, string ZipCode, DateTime CreatedAt);
+public record SubscriptionRequest(
+    string Email, 
+    string ZipCode, 
+    ThresholdType Type = ThresholdType.TemperatureLow, 
+    double Value = 32.0, 
+    string ComparisonOperator = "less-than"
+);
+
+public record SubscriptionRecord(
+    Guid Id, 
+    string Email, 
+    string ZipCode, 
+    ThresholdType Type, 
+    double Value, 
+    string ComparisonOperator,
+    DateTime CreatedAt
+);
 
 public interface ISubscriptionAccessor
 {

@@ -1,0 +1,30 @@
+# Initial Concept
+
+A cloud-native .NET 10 microservices application for weather forecasting and notifications with full observability.
+
+
+# Product Definition: ContainerApp
+
+## Vision
+ContainerApp is a cloud-native, high-observability microservices platform designed to provide accurate weather forecasts and timely notifications. It serves as a reference architecture for modern .NET development, demonstrating the integration of service meshes, message streaming, and distributed tracing in a robust, layered architecture.
+
+## Target Audience
+- **Developers:** Seeking a robust template for .NET 10 microservices and Dapr integration.
+- **System Architects:** Evaluating IDesign principles and volatility-based decomposition in a cloud-native context.
+- **Operations/DevOps:** Interested in full-stack observability with OpenTelemetry, Prometheus, and Grafana.
+
+## Core Goals
+1. **Provide Reliable Weather Data:** Deliver real-time and forecasted weather information via a modern web interface.
+2. **Ensure Timely Notifications:** Process weather-related alerts through a resilient Kafka-based messaging system.
+3. **Showcase Modern Architecture:** Implement IDesign principles to create a maintainable, scalable, and testable system.
+4. **Demonstrate Deep Observability:** Provide end-to-end visibility into service health, performance, and message flows.
+
+## Key Features
+- **Weather Dashboard:** A user-friendly Razor Pages frontend for weather visualization.
+- **Resilient Microservices:** Independent services for weather data and notifications, coordinated via Dapr.
+- **Async Messaging:** Kafka-driven notification pipeline with support for both JSON and Avro schemas.
+- **End-to-End Integration Tests:** Comprehensive test suite verifying data flow across all services and infrastructure.
+- **Advanced Caching:** Leveraging .NET 10 HybridCache for optimized performance and stampede protection.
+- **Full Observability Stack:** Integrated Zipkin for tracing, Prometheus for metrics, and Grafana for visualization.
+- **Resilient Communication:** Implementation of Polly-based retry policies and Dapr's resiliency features.
+- **Automated Weather Alerts:** Proactive detection of freezing temperatures and other weather extremes with automated Kafka notifications.

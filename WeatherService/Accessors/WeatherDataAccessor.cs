@@ -29,7 +29,7 @@ public class WeatherDataAccessor : IWeatherDataAccessor
 
         try
         {
-            var url = $"v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true&temperature_unit=fahrenheit&hourly=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto";
+            var url = $"v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true&temperature_unit=fahrenheit&hourly=temperature_2m,weathercode,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max&timezone=auto";
 
             var response = await _retry.ExecuteWithRetryAsync(async (ct) =>
             {
@@ -66,7 +66,8 @@ public class WeatherDataAccessor : IWeatherDataAccessor
                 time,
                 weatherData.Hourly.Temperature2m[index],
                 weatherData.Hourly.WeatherCode[index],
-                string.Empty // To be filled by manager
+                string.Empty, // To be filled by manager
+                weatherData.Hourly.WindSpeed10m?[index] ?? 0
             )).Take(24);
 
             var dailyForecasts = weatherData.Daily?.Time.Select((time, index) => new DailyForecast(
@@ -74,7 +75,8 @@ public class WeatherDataAccessor : IWeatherDataAccessor
                 weatherData.Daily.Temperature2mMax[index],
                 weatherData.Daily.Temperature2mMin[index],
                 weatherData.Daily.WeatherCode[index],
-                string.Empty // To be filled by manager
+                string.Empty, // To be filled by manager
+                weatherData.Daily.PrecipitationProbabilityMax?[index] ?? 0
             ));
 
             return new WeatherDataResult(

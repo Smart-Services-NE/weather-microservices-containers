@@ -86,9 +86,9 @@ app.MapGet("/api/weather/cached", async (string zipcode, IWeatherManager manager
     return Results.Ok(result.Data);
 });
 
-app.MapPost("/api/weather/alerts/freezing", async (string zipcode, string email, IWeatherManager manager, CancellationToken ct) =>
+app.MapPost("/api/weather/alerts/freezing", async (FreezingAlertRequest request, IWeatherManager manager, CancellationToken ct) =>
 {
-    var result = await manager.NotifyIfFreezingAsync(zipcode, email, ct);
+    var result = await manager.CheckAndNotifyFreezingAsync(request.ZipCode, request.Email, ct);
 
     if (!result.Success)
     {

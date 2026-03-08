@@ -7,8 +7,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddWeatherServiceUtilities(this IServiceCollection services)
     {
-        services.AddScoped<ICacheUtility, CacheUtility>();
-        services.AddScoped<ITelemetryUtility, TelemetryUtility>();
+        services.AddSingleton<ICacheUtility, CacheUtility>();
+        services.AddSingleton<ITelemetryUtility, TelemetryUtility>();
         services.AddSingleton<IRetryPolicyUtility, RetryPolicyUtility>();
         return services;
     }

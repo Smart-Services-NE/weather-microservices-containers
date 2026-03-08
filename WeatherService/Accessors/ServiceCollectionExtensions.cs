@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
             client.BaseAddress = new Uri("http://api.zippopotam.us/");
         });
 
-        services.AddScoped<IAlertPublisherAccessor, AlertPublisherAccessor>();
+        services.AddSingleton<IAlertPublisherAccessor, AlertPublisherAccessor>();
         services.AddScoped<ISubscriptionAccessor, SubscriptionAccessor>();
 
         return services;

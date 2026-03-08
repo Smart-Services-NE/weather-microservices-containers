@@ -1,0 +1,24 @@
+flowchart TD
+    User(User) --> WeatherWeb[WeatherWeb Frontend]
+    WeatherWeb --> WeatherService[WeatherService API]
+    
+    DaprCron[Dapr Cron Binding] --> WeatherService
+    WeatherService --> Kafka[Apache Kafka PubSub]
+    Kafka --> NotificationService[NotificationService Worker]
+    
+    NotificationService --> SQLite[(SQLite DB)]
+    NotificationService --> Azurite[(Azurite Storage)]
+    
+    WeatherService --> OpenMeteo[Open-Meteo API]
+    WeatherService --> Zippopotam[Zippopotam API]
+    NotificationService --> SMTP[SMTP Server]
+    
+    WeatherWeb --> Zipkin[Zipkin Tracing]
+    WeatherService --> Zipkin
+    NotificationService --> Zipkin
+    
+    WeatherWeb --> Prometheus[Prometheus Metrics]
+    WeatherService --> Prometheus
+    NotificationService --> Prometheus
+    
+    Prometheus --> Grafana[Grafana Dashboards]

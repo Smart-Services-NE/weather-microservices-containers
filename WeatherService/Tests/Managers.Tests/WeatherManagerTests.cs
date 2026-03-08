@@ -219,7 +219,7 @@ public class WeatherManagerTests
     }
 
     [Fact]
-    public async Task NotifyIfFreezingAsync_WhenFreezing_ShouldPublishAlert()
+    public async Task CheckAndNotifyFreezingAsync_WhenFreezing_ShouldPublishAlert()
     {
         // Arrange
         var zipCode = "68136";
@@ -241,7 +241,7 @@ public class WeatherManagerTests
             .ReturnsAsync(new Result(true));
 
         // Act
-        var result = await _manager.NotifyIfFreezingAsync(zipCode, email, CancellationToken.None);
+        var result = await _manager.CheckAndNotifyFreezingAsync(zipCode, email, CancellationToken.None);
 
         // Assert
         result.Success.Should().BeTrue();

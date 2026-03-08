@@ -1,0 +1,22 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: pubsub
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+  - name: brokers
+    value: "pkc-n3603.us-central1.gcp.confluent.cloud:9092"
+  - name: consumerID
+    value: "containerapp-consumer-final"
+  - name: authType
+    value: "sasl"
+  - name: saslMechanism
+    value: "plain"
+  - name: saslUsername
+    value: "Z4TZDPXR7YTJMISG"
+  - name: saslPassword
+    value: "cfltjS3Ghv/g5kkBgZD0YkkeCjmI0uB0OtODdP1KqkAS5XeqG5UJNmtf2aVmCjQA"
+  - name: rawPayload
+    value: "true"

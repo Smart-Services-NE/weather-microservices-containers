@@ -16,6 +16,9 @@ public class WeatherDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Email).IsRequired();
             entity.Property(e => e.ZipCode).IsRequired();
+            entity.Property(e => e.Type).IsRequired();
+            entity.Property(e => e.Value).IsRequired();
+            entity.Property(e => e.ComparisonOperator).IsRequired();
         });
     }
 }

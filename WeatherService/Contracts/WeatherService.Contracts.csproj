@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Apache.Avro" Version="1.12.1" />
+  </ItemGroup>
+
 </Project>

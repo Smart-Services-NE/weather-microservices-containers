@@ -4,5 +4,6 @@ public record HourlyForecast(
     string Time,
     double TemperatureF,
     int WeatherCode,
-    string Summary
+    string Summary,
+    double WindSpeed = 0
 );

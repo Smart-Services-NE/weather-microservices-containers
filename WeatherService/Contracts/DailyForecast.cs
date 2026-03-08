@@ -5,5 +5,6 @@ public record DailyForecast(
     double TemperatureMaxF,
     double TemperatureMinF,
     int WeatherCode,
-    string Summary
+    string Summary,
+    int PrecipitationProbability = 0
 );

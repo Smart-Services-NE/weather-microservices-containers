@@ -8,6 +8,19 @@ services:
     environment:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_ENVIRONMENT=Development
+      - DAPR_GRPC_PORT=50001
+      - DAPR_HTTP_PORT=3501
+      - DAPR_GRPC_ENDPOINT=http://weather-api-dapr:50001
+      - DAPR_HTTP_ENDPOINT=http://weather-api-dapr:3501
+      - Kafka__UseAvro=true
+      - Kafka__BootstrapServers=pkc-n3603.us-central1.gcp.confluent.cloud:9092
+      - Kafka__SecurityProtocol=SaslSsl
+      - Kafka__SaslMechanism=Plain
+      - Kafka__SaslUsername=Z4TZDPXR7YTJMISG
+      - Kafka__SaslPassword=cfltjS3Ghv/g5kkBgZD0YkkeCjmI0uB0OtODdP1KqkAS5XeqG5UJNmtf2aVmCjQA
+      - Kafka__SchemaRegistryUrl=https://psrc-knmwm.us-east-2.aws.confluent.cloud
+      - Kafka__SchemaRegistryKey=DP4DBAWO25S7YPAP
+      - Kafka__SchemaRegistrySecret=cfltSug1YD8Wcn5FBbrtrSEfey6i41E8xXzdNBvkvsxlJqfBRqhNzVUkc6zcPfvg
 
   weather-api-dapr:
     image: "daprio/daprd:latest"
@@ -30,6 +43,10 @@ services:
     environment:
       - ASPNETCORE_HTTP_PORTS=8081
       - ASPNETCORE_ENVIRONMENT=Development
+      - DAPR_GRPC_PORT=50002
+      - DAPR_HTTP_PORT=3500
+      - DAPR_GRPC_ENDPOINT=http://weather-web-dapr:50002
+      - DAPR_HTTP_ENDPOINT=http://weather-web-dapr:3500
     depends_on:
       - weather-api
 
@@ -177,18 +194,22 @@ services:
     environment:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_ENVIRONMENT=Development
+      - DAPR_GRPC_PORT=50003
+      - DAPR_HTTP_PORT=3502
+      - DAPR_GRPC_ENDPOINT=http://notification-api-dapr:50003
+      - DAPR_HTTP_ENDPOINT=http://notification-api-dapr:3502
       # Kafka Configuration (Confluent Cloud)
-      - Kafka__BootstrapServers=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9093}
-      - Kafka__GroupId=${KAFKA_GROUP_ID:-notification-service}
-      - Kafka__SecurityProtocol=${KAFKA_SECURITY_PROTOCOL:-}
-      - Kafka__SaslMechanism=${KAFKA_SASL_MECHANISM:-}
-      - Kafka__SaslUsername=${KAFKA_SASL_USERNAME:-}
-      - Kafka__SaslPassword=${KAFKA_SASL_PASSWORD:-}
+      - Kafka__BootstrapServers=pkc-n3603.us-central1.gcp.confluent.cloud:9092
+      - Kafka__GroupId=containerapp-group-final
+      - Kafka__SecurityProtocol=SaslSsl
+      - Kafka__SaslMechanism=Plain
+      - Kafka__SaslUsername=Z4TZDPXR7YTJMISG
+      - Kafka__SaslPassword=cfltjS3Ghv/g5kkBgZD0YkkeCjmI0uB0OtODdP1KqkAS5XeqG5UJNmtf2aVmCjQA
       # Schema Registry Configuration (Required for Avro deserialization)
-      - Kafka__SchemaRegistryUrl=${KAFKA_SCHEMA_REGISTRY_URL:-}
-      - Kafka__SchemaRegistryKey=${KAFKA_SCHEMA_REGISTRY_KEY:-}
-      - Kafka__SchemaRegistrySecret=${KAFKA_SCHEMA_REGISTRY_SECRET:-}
-      - Kafka__UseAvroConsumer=${KAFKA_USE_AVRO_CONSUMER:-true}
+      - Kafka__SchemaRegistryUrl=https://psrc-knmwm.us-east-2.aws.confluent.cloud
+      - Kafka__SchemaRegistryKey=DP4DBAWO25S7YPAP
+      - Kafka__SchemaRegistrySecret=cfltSug1YD8Wcn5FBbrtrSEfey6i41E8xXzdNBvkvsxlJqfBRqhNzVUkc6zcPfvg
+      - Kafka__UseAvroConsumer=true
       # Email Configuration
       - Email__SmtpHost=smtp.gmail.com
       - Email__SmtpPort=587

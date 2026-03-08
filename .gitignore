@@ -43,3 +43,4 @@ docker-compose.override.yml
 
 # OS-specific files
 .DS_Store
+api-*.txt
