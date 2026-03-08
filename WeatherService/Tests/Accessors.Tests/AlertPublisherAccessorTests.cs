@@ -2,6 +2,7 @@ using Moq;
 using FluentAssertions;
 using Dapr.Client;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using WeatherService.Accessors;
 using WeatherService.Contracts;
 using Xunit;
@@ -14,6 +15,7 @@ public class AlertPublisherAccessorTests
     private readonly Mock<IRetryPolicyUtility> _mockRetry;
     private readonly Mock<ITelemetryUtility> _mockTelemetry;
     private readonly Mock<ILogger<AlertPublisherAccessor>> _mockLogger;
+    private readonly Microsoft.Extensions.Configuration.IConfiguration _config;
     private readonly AlertPublisherAccessor _accessor;
 
     public AlertPublisherAccessorTests()
@@ -22,6 +24,14 @@ public class AlertPublisherAccessorTests
         _mockRetry = new Mock<IRetryPolicyUtility>();
         _mockTelemetry = new Mock<ITelemetryUtility>();
         _mockLogger = new Mock<ILogger<AlertPublisherAccessor>>();
+        
+        // Use a real configuration instead of a mock to handle extension methods like GetValue
+        _config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Kafka:UseAvro"] = "false"
+            })
+            .Build();
 
         // Setup retry logic to execute immediately
         _mockRetry
@@ -32,7 +42,8 @@ public class AlertPublisherAccessorTests
             _mockDapr.Object,
             _mockRetry.Object,
             _mockTelemetry.Object,
-            _mockLogger.Object);
+            _mockLogger.Object,
+            _config);
     }
 
     [Fact]
@@ -59,6 +70,7 @@ public class AlertPublisherAccessorTests
                 a.AlertType == "TEMPERATURE_EXTREME" &&
                 a.Severity == "WARNING"
             ),
+            It.IsAny<Dictionary<string, string>>(),
             It.IsAny<CancellationToken>()
         ), Times.Once);
     }

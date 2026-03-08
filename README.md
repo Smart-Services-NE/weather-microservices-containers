@@ -196,7 +196,11 @@ Edit `NotificationService/Clients/WebApi/appsettings.json`:
 ### Run Tests
 
 ```bash
+# Run unit tests
 dotnet test
+
+# Run end-to-end integration tests
+dotnet test IntegrationTests/IntegrationTests.csproj
 ```
 
 ### Debug Service

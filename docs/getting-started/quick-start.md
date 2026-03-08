@@ -68,6 +68,38 @@ open http://localhost:8081
 podman compose logs -f notification-api | grep "test-001"
 ```
 
+## Run Integration Tests
+
+A comprehensive suite of end-to-end integration tests is available to verify data flow through all services.
+
+### Prerequisites
+
+- All services running (see [Start All Services](#start-all-services))
+- Kafka cluster accessible (Local or Confluent Cloud)
+
+### Execute Tests
+
+```bash
+# Run all integration tests
+dotnet test IntegrationTests/IntegrationTests.csproj
+
+# Run specific test categories
+dotnet test IntegrationTests/IntegrationTests.csproj --filter Category=Infrastructure
+```
+
+### Key Scenarios Covered
+
+1. **Infrastructure Ping**: Verifies connectivity to Kafka and SQLite.
+2. **Freezing Alert Flow**: Triggers a freezing alert request and verifies it propagates through Kafka to the notification database.
+3. **Subscription Flow**: Creates a weather sentinel subscription and verifies that triggered alerts result in notifications.
+
+### Troubleshooting Tests
+
+If tests fail:
+1. Ensure `IntegrationTests/appsettings.json` matches your environment.
+2. Check `podman compose ps` to ensure all services and Dapr sidecars are up.
+3. Review logs for serialization errors (Avro vs JSON) or authorization issues.
+
 ## Stop Services
 
 ```bash
