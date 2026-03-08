@@ -17,7 +17,7 @@ public class CreateTopics
         var config = TestConfig.KafkaAdminConfig;
         using var adminClient = new AdminClientBuilder(config).Build();
 
-        var topics = new[] { "weather-alerts", "general-events" };
+        var topics = new[] { "weather-weather-alerts", "weather-general-events" };
         var metadata = adminClient.GetMetadata(TimeSpan.FromSeconds(10));
         
         var existingTopics = metadata.Topics.Select(t => t.Topic).ToList();

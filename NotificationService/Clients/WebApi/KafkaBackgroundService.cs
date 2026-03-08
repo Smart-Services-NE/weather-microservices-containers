@@ -9,7 +9,7 @@ public class KafkaBackgroundService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<KafkaBackgroundService> _logger;
-    private readonly string[] _topics = { "weather-alerts", "general-events" };
+    private readonly string[] _topics = { "weather-weather-alerts", "weather-general-events" };
 
     public KafkaBackgroundService(
         IServiceProvider serviceProvider,

@@ -21,7 +21,7 @@ public class AlertPublisherAccessor : IAlertPublisherAccessor, IDisposable
     private readonly ISchemaRegistryClient? _schemaRegistryClient;
 
     private const string PubSubName = "pubsub";
-    private const string TopicName = "weather-alerts";
+    private const string TopicName = "weather-weather-alerts";
 
     public AlertPublisherAccessor(
         DaprClient dapr,
