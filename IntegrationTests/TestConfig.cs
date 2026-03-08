@@ -2,11 +2,17 @@ using Microsoft.Extensions.Configuration;
 
 namespace IntegrationTests;
 
+/// <summary>
+/// Provides configuration settings for the integration tests.
+/// </summary>
 public static class TestConfig
 {
     private static IConfiguration? _configuration;
     private static string? _projectRoot;
 
+    /// <summary>
+    /// Gets the configuration built from appsettings.json.
+    /// </summary>
     public static IConfiguration Configuration
     {
         get
@@ -22,6 +28,9 @@ public static class TestConfig
         }
     }
 
+    /// <summary>
+    /// Gets the absolute path to the project root (solution directory).
+    /// </summary>
     public static string ProjectRoot
     {
         get
@@ -39,8 +48,14 @@ public static class TestConfig
         }
     }
 
+    /// <summary>
+    /// Gets the Kafka bootstrap servers from configuration.
+    /// </summary>
     public static string KafkaBootstrapServers => Configuration["IntegrationTests:Kafka:BootstrapServers"] ?? "localhost:9092";
     
+    /// <summary>
+    /// Gets the absolute path to the notification SQLite database file.
+    /// </summary>
     public static string NotificationDbPath
     {
         get

@@ -6,8 +6,14 @@ using Xunit;
 
 namespace IntegrationTests;
 
+/// <summary>
+/// Contains simple tests to verify connectivity to external resources like Kafka and SQLite.
+/// </summary>
 public class InfrastructurePingTests
 {
+    /// <summary>
+    /// Verifies that the Kafka broker is reachable and returns metadata.
+    /// </summary>
     [Fact]
     public void Kafka_ShouldBeConnectable()
     {
@@ -24,6 +30,9 @@ public class InfrastructurePingTests
         metadata.Brokers.Should().NotBeEmpty();
     }
 
+    /// <summary>
+    /// Verifies that the notification SQLite database file exists and is connectable via Entity Framework Core.
+    /// </summary>
     [Fact]
     public void NotificationDatabase_ShouldBeConnectableAndHaveTables()
     {
