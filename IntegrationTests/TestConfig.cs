@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Confluent.Kafka;
 
 namespace IntegrationTests;
 
@@ -49,9 +50,44 @@ public static class TestConfig
     }
 
     /// <summary>
-    /// Gets the Kafka bootstrap servers from configuration.
+    /// Gets the Kafka admin configuration.
     /// </summary>
-    public static string KafkaBootstrapServers => Configuration["IntegrationTests:Kafka:BootstrapServers"] ?? "localhost:9092";
+    public static AdminClientConfig KafkaAdminConfig
+    {
+        get
+        {
+            var config = new AdminClientConfig
+            {
+                BootstrapServers = Configuration["IntegrationTests:Kafka:BootstrapServers"] ?? "localhost:9092"
+            };
+
+            var securityProtocol = Configuration["IntegrationTests:Kafka:SecurityProtocol"];
+            if (!string.IsNullOrEmpty(securityProtocol) && Enum.TryParse<SecurityProtocol>(securityProtocol, true, out var protocol))
+            {
+                config.SecurityProtocol = protocol;
+            }
+
+            var saslMechanism = Configuration["IntegrationTests:Kafka:SaslMechanism"];
+            if (!string.IsNullOrEmpty(saslMechanism) && Enum.TryParse<SaslMechanism>(saslMechanism, true, out var mechanism))
+            {
+                config.SaslMechanism = mechanism;
+            }
+
+            var saslUsername = Configuration["IntegrationTests:Kafka:SaslUsername"];
+            if (!string.IsNullOrEmpty(saslUsername))
+            {
+                config.SaslUsername = saslUsername;
+            }
+
+            var saslPassword = Configuration["IntegrationTests:Kafka:SaslPassword"];
+            if (!string.IsNullOrEmpty(saslPassword))
+            {
+                config.SaslPassword = saslPassword;
+            }
+
+            return config;
+        }
+    }
     
     /// <summary>
     /// Gets the absolute path to the notification SQLite database file.

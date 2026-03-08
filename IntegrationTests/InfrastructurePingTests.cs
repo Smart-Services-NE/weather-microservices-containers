@@ -18,14 +18,11 @@ public class InfrastructurePingTests
     public void Kafka_ShouldBeConnectable()
     {
         // Arrange
-        var config = new AdminClientConfig
-        {
-            BootstrapServers = TestConfig.KafkaBootstrapServers
-        };
+        var config = TestConfig.KafkaAdminConfig;
 
         // Act & Assert
         using var adminClient = new AdminClientBuilder(config).Build();
-        var metadata = adminClient.GetMetadata(TimeSpan.FromSeconds(5));
+        var metadata = adminClient.GetMetadata(TimeSpan.FromSeconds(10));
         
         metadata.Brokers.Should().NotBeEmpty();
     }
