@@ -20,6 +20,18 @@ public class SubscriptionTests
     {
         _httpClient = new HttpClient { BaseAddress = new Uri(TestConfig.Configuration["IntegrationTests:ServiceUrls:WeatherApi"] ?? "http://localhost:8080") };
         _notificationDbPath = TestConfig.NotificationDbPath;
+
+        // Clean up database before each test
+        CleanupDatabase();
+    }
+
+    private void CleanupDatabase()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<NotificationDbContext>();
+        optionsBuilder.UseSqlite($"Data Source={_notificationDbPath}");
+        using var context = new NotificationDbContext(optionsBuilder.Options);
+        context.Notifications.RemoveRange(context.Notifications);
+        context.SaveChanges();
     }
 
     /// <summary>

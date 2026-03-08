@@ -20,6 +20,18 @@ public class FreezingAlertTests
     {
         _httpClient = new HttpClient { BaseAddress = new Uri(TestConfig.Configuration["IntegrationTests:ServiceUrls:WeatherApi"] ?? "http://localhost:8080") };
         _notificationDbPath = TestConfig.NotificationDbPath;
+        
+        // Clean up database before each test
+        CleanupDatabase();
+    }
+
+    private void CleanupDatabase()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<NotificationDbContext>();
+        optionsBuilder.UseSqlite($"Data Source={_notificationDbPath}");
+        using var context = new NotificationDbContext(optionsBuilder.Options);
+        context.Notifications.RemoveRange(context.Notifications);
+        context.SaveChanges();
     }
 
     /// <summary>
@@ -30,11 +42,16 @@ public class FreezingAlertTests
     {
         // Arrange
         var testEmail = $"test-{Guid.NewGuid()}@example.com";
-        var zipCode = "68136"; // Omaha, NE
+        var zipCode = "99701"; // Fairbanks, AK
         var request = new FreezingAlertRequest(zipCode, testEmail);
 
         // Act
         var response = await _httpClient.PostAsJsonAsync("/api/weather/alerts/freezing", request);
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}). Error: {error}");
+        }
         response.EnsureSuccessStatusCode();
 
         // Assert - Poll the database for the notification
