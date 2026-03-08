@@ -46,6 +46,13 @@ public class NotificationStorageAccessor : INotificationStorageAccessor
     {
         try
         {
+            // Handle tracking conflict for immutable records
+            var tracked = _dbContext.Notifications.Local.FirstOrDefault(n => n.Id == record.Id);
+            if (tracked != null)
+            {
+                _dbContext.Entry(tracked).State = EntityState.Detached;
+            }
+
             _dbContext.Notifications.Update(record);
             await _dbContext.SaveChangesAsync(cancellationToken);
 

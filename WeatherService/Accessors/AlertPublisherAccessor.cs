@@ -57,9 +57,11 @@ public class AlertPublisherAccessor : IAlertPublisherAccessor
 
             _logger.LogInformation("Publishing freezing alert for {ZipCode} to {Email}", zipCode, email);
 
+            var metadata = new Dictionary<string, string> { { "rawPayload", "true" } };
+
             await _retry.ExecuteWithRetryAsync(async (cToken) =>
             {
-                await _dapr.PublishEventAsync(PubSubName, TopicName, alert, cToken);
+                await _dapr.PublishEventAsync(PubSubName, TopicName, alert, metadata, cToken);
             }, ct);
 
             _telemetry.RecordMetric("weather.alert.freezing.published", 1,
