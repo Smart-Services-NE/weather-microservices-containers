@@ -1,0 +1,64 @@
+graph TD
+    %% User and External Clients
+    User([User]) -->|HTTP/Browser| WeatherWeb[WeatherWeb (Frontend)]
+
+    %% Services
+    subgraph "ContainerApp Services"
+        WeatherWeb -->|Dapr Invocation / HTTP| WeatherService[WeatherService (API)]
+        
+        subgraph "Notification System"
+            NotificationService[NotificationService (Worker)]
+            SQLite[(SQLite DB)]
+            Azurite[(Azurite Storage)]
+            NotificationService --> SQLite
+            NotificationService --> Azurite
+        end
+    end
+
+    %% Infrastructure & Middleware
+    subgraph "Dapr & Middleware"
+        DaprCron[Dapr Cron Binding] -->|Trigger @daily| WeatherService
+        Kafka{{Apache Kafka (Pub/Sub)}}
+        
+        WeatherService -- Publish --> Kafka
+        Kafka -- Subscribe --> NotificationService
+    end
+
+    %% External Dependencies
+    subgraph "External APIs"
+        OpenMeteo[Open-Meteo API]
+        Zippopotam[Zippopotam API]
+        SMTP[SMTP Server (Gmail)]
+    end
+
+    WeatherService -->|Get Weather| OpenMeteo
+    WeatherService -->|Geocoding| Zippopotam
+    NotificationService -->|Send Email| SMTP
+
+    %% Observability
+    subgraph "Observability Stack"
+        Zipkin[Zipkin (Tracing)]
+        Prometheus[Prometheus (Metrics)]
+        Grafana[Grafana (Dashboards)]
+        
+        WeatherWeb -.->|Trace| Zipkin
+        WeatherService -.->|Trace| Zipkin
+        NotificationService -.->|Trace| Zipkin
+        
+        WeatherWeb -.->|Metrics| Prometheus
+        WeatherService -.->|Metrics| Prometheus
+        NotificationService -.->|Metrics| Prometheus
+        
+        Prometheus --> Grafana
+    end
+
+    %% Styling
+    classDef service fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef infra fill:#dfd,stroke:#333,stroke-width:2px;
+    classDef external fill:#ddf,stroke:#333,stroke-width:2px;
+    classDef db fill:#ffd,stroke:#333,stroke-width:2px;
+    
+    class WeatherWeb,WeatherService,NotificationService service;
+    class Kafka,DaprCron infra;
+    class OpenMeteo,Zippopotam,SMTP external;
+    class SQLite,Azurite db;
